@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSA Testing System</title>
+    <style>
+        :root {
+            --primary: #e41e3f;
+            --primary-dark: #c41832;
+            --primary-light: #ff2d4d;
+            --text-light: #ffffff;
+            --background: #f8f9fa;
+            --shadow: 0 4px 12px rgba(228, 30, 63, 0.2);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--text-light);
+            padding: 1.2rem 2.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .initial-exam-selector {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .initial-exam-selector.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: translate(-50%, -60%);
+        }
+
+        .initial-exam-selector h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .exam-selector {
+            width: 100%;
+        }
+
+        .exam-selector select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--primary);
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            color: var(--primary);
+            background: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .exam-selector select:hover {
+            background: rgba(228, 30, 63, 0.1);
+        }
+
+        .main-container {
+            margin-top: 4rem;
+            padding: 1rem;
+            height: calc(100vh - 4rem);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: var(--background);
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            max-width: 1000px;
+            height: calc(100vh - 6rem);
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(228, 30, 63, 0.1);
+            display: none;
+            position: relative;
+        }
+
+        .pdf-viewer.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        #pdfViewer {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: white;
+        }
+
+        .answer-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--text-light);
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            z-index: 99;
+            font-size: 1.1rem;
+        }
+
+        .answer-toggle:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+        }
+
+        .answer-sheet {
+            position: fixed;
+            right: -400px;
+            top: 4rem;
+            width: 400px;
+            height: calc(100vh - 4rem);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            padding: 2rem;
+            overflow-y: auto;
+            z-index: 98;
+        }
+
+        .answer-sheet.active {
+            right: 0;
+        }
+
+        .answer-sheet h2 {
+            margin-bottom: 2rem;
+            color: var(--primary);
+        }
+
+        .answer-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .answer-label {
+            min-width: 60px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .answer-input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .answer-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(228, 30, 63, 0.2);
+            outline: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 2rem;
+            transition: var(--transition);
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            width: 400px;
+            max-width: 90%;
+            box-shadow: var(--shadow);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        #userName {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            transition: var(--transition);
+        }
+
+        #userName:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(228, 30, 63, 0.2);
+            outline: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-btn.cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-btn.submit {
+            background: var(--primary);
+            color: var(--text-light);
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading svg circle {
+            stroke: var(--primary);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .exam-selector {
+                width: 100%;
+            }
+
+            .answer-sheet {
+                width: 100%;
+                right: -100%;
+            }
+
+            .answer-toggle {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.8rem 1.5rem;
+            }
+
+            .initial-exam-selector {
+                width: 90%;
+                padding: 1.5rem;
+            }
+
+            .pdf-viewer {
+                height: calc(100vh - 5rem);
+                margin-top: 0;
+            }
+
+            .main-container {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header hidden">
+        <h1>TSA Testing System</h1>
+    </header>
+
+    <div class="initial-exam-selector">
+        <h2>Chọn đề thi</h2>
+        <div class="exam-selector">
+            <select id="examSelector">
+                <option value="">Vui lòng chọn đề thi...</option>
+            </select>
+        </div>
+    </div>
+
+    <main class="main-container">
+        <div class="pdf-viewer">
+            <iframe id="pdfViewer"></iframe>
+        </div>
+    </main>
+
+    <button class="answer-toggle" onclick="toggleAnswerSheet()">
+        Phiếu Trả Lời
+    </button>
+
+    <div class="answer-sheet" id="answerSheet">
+        <h2>Phiếu Trả Lời</h2>
+        <form id="answerForm">
+            <div id="answerContainer"></div>
+            <button type="submit" class="submit-btn">Nộp Bài</button>
+        </form>
+    </div>
+
+    <div id="submitModal" class="modal">
+        <div class="modal-content">
+            <h3>Xác nhận nộp bài</h3>
+            <input type="text" id="userName" placeholder="Nhập tên của bạn">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeModal()">Hủy</button>
+                <button class="modal-btn submit" onclick="submitWithName()">Nộp bài</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading">
+        <svg width="50" height="50" viewBox="0 0 50 50">
+            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5">
+                <animate attributeName="stroke-dasharray" dur="1.5s" repeatCount="indefinite"
+                    values="1,150;90,150;90,150" />
+                <animate attributeName="stroke-dashoffset" dur="1.5s" repeatCount="indefinite" values="0;-35;-124" />
+            </circle>
+        </svg>
+    </div>
+
+    <script>
+        const FOLDER_ID = '1Hng8eJxMsb411NSFAcquxi8i34cS2u4L';
+        let currentExam = '';
+
+        // Auto fullscreen on load
+        document.addEventListener('DOMContentLoaded', function () {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+
+            initializeAnswerSheet();
+            loadExamList();
+        });
+
+        // Add click event for header title
+        document.querySelector('.header h1').addEventListener('click', function (e) {
+            e.preventDefault();
+            if (confirm('Bạn có chắc muốn quay về trang chủ? Mọi dữ liệu chưa lưu sẽ bị mất!')) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        function initializeAnswerSheet() {
+            const answerContainer = document.getElementById('answerContainer');
+            for (let i = 1; i <= 40; i++) {
+                const answerGroup = document.createElement('div');
+                answerGroup.className = 'answer-group';
+                answerGroup.innerHTML = `
+            <label class="answer-label">Câu ${i}:</label>
+            <input type="text" class="answer-input" id="answer${i}" name="answer${i}">
+        `;
+                answerContainer.appendChild(answerGroup);
+            }
+        }
+
+        async function loadExamList() {
+            try {
+                showLoading();
+                const response = await fetch(
+                    `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents&key=AIzaSyAHPhgvfd8QHq-HGfDa4pi4Ey8h6IyyzcA`
+                );
+                const data = await response.json();
+                const selector = document.getElementById('examSelector');
+
+                data.files.forEach(file => {
+                    const option = document.createElement('option');
+                    option.value = file.id;
+                    option.textContent = file.name;
+                    selector.appendChild(option);
+                });
+                hideLoading();
+            } catch (error) {
+                console.error("Error loading exam list:", error);
+                hideLoading();
+                alert('Có lỗi khi tải danh sách đề thi. Vui lòng thử lại!');
+            }
+        }
+
+        document.getElementById('examSelector').addEventListener('change', function (e) {
+            const fileId = e.target.value;
+            if (fileId) {
+                // Kích hoạt fullscreen khi người dùng chọn đề thi
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                }
+
+                currentExam = e.target.options[e.target.selectedIndex].text;
+                document.querySelector('.initial-exam-selector').classList.add('hidden');
+                document.querySelector('.header').classList.remove('hidden');
+                document.querySelector('.pdf-viewer').classList.add('active');
+
+                showLoading();
+                const pdfUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                document.getElementById('pdfViewer').src = pdfUrl;
+                document.getElementById('pdfViewer').onload = hideLoading;
+
+                loadSavedAnswers();
+            }
+        });
+
+        function toggleAnswerSheet() {
+            const sheet = document.getElementById('answerSheet');
+            sheet.classList.toggle('active');
+        }
+
+        function showModal() {
+            document.getElementById('submitModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('submitModal').classList.remove('active');
+        }
+
+        function showLoading() {
+            const loading = document.querySelector('.loading');
+            loading.classList.add('active');
+        }
+
+        function hideLoading() {
+            const loading = document.querySelector('.loading');
+            loading.classList.remove('active');
+        }
+
+        document.getElementById('answerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            showModal();
+        });
+
+        async function submitWithName() {
+            const userName = document.getElementById('userName').value;
+            if (!userName) {
+                alert('Vui lòng nhập tên của bạn!');
+                return;
+            }
+            if (!currentExam) {
+                alert('Vui lòng chọn đề!');
+                return;
+            }
+
+            const answers = {};
+            for (let i = 1; i <= 40; i++) {
+                answers[`cau${i}`] = document.getElementById(`answer${i}`).value;
+            }
+
+            const fileContent = {
+                userName: userName,
+                examName: currentExam,
+                answers: answers,
+                fileName: `${currentExam}_${userName}.txt`
+            };
+
+            try {
+                showLoading();
+                const response = await fetch('https://script.google.com/macros/s/AKfycbzZPOI4JsXETdkPyjHran4z4Cz6OUAigW8dCaxjo4OUOPZTJxO0o0mHlCyXCc4U1VXS/exec', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(fileContent)
+                });
+
+                hideLoading();
+                alert('Nộp bài thành công!');
+                closeModal();
+                document.getElementById('answerForm').reset();
+                localStorage.removeItem('savedAnswers');
+                localStorage.removeItem('savedExam');
+
+                // Thêm đoạn code sau để chuyển về trang chủ
+                window.onbeforeunload = null; // Tắt cảnh báo rời trang
+                window.location.href = 'index.html'; // Chuyển về trang chủ
+
+            } catch (error) {
+                console.error("Error submitting answers: ", error);
+                hideLoading();
+                alert('Có lỗi xảy ra khi nộp bài. Vui lòng thử lại!');
+            }
+        }
+
+        function saveAnswersToLocalStorage() {
+            const answers = {};
+            for (let i = 1; i <= 40; i++) {
+                answers[`answer${i}`] = document.getElementById(`answer${i}`).value;
+            }
+            localStorage.setItem('savedAnswers', JSON.stringify(answers));
+            localStorage.setItem('savedExam', currentExam);
+        }
+
+        function loadSavedAnswers() {
+            const savedAnswers = localStorage.getItem('savedAnswers');
+            const savedExam = localStorage.getItem('savedExam');
+
+            if (savedAnswers && savedExam === currentExam) {
+                const answers = JSON.parse(savedAnswers);
+                for (let i = 1; i <= 40; i++) {
+                    document.getElementById(`answer${i}`).value = answers[`answer${i}`] || '';
+                }
+            }
+        }
+
+        // Auto-save every 30 seconds
+        setInterval(saveAnswersToLocalStorage, 10000);
+
+        // Add input event listeners for all answer inputs
+        for (let i = 1; i <= 40; i++) {
+            document.getElementById(`answer${i}`).addEventListener('input', function () {
+                saveAnswersToLocalStorage();
+            });
+        }
+
+        // Prevent accidental navigation
+        window.onbeforeunload = function () {
+            return "Bạn có chắc muốn rời khỏi trang? Mọi dữ liệu sẽ bị mất!";
+        };
+
+        // Handle keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            // Alt + A to toggle answer sheet
+            if (e.altKey && e.key === 'a') {
+                toggleAnswerSheet();
+            }
+            // Escape to close modal
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Prevent page reload using different methods
+        window.addEventListener('beforeunload', function (e) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        });
+
+        // Disable refresh shortcuts
+        document.addEventListener('keydown', function (e) {
+            // Prevent F5 key
+            if (e.key === 'F5') {
+                e.preventDefault();
+                return false;
+            }
+
+            // Prevent Ctrl + R
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                return false;
+            }
+
+            // Prevent Ctrl + Shift + R
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Disable right-click context menu to prevent reload
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        });
+
+    </script>
+</body>
+
+</html>

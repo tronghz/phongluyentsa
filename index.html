@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSA Learning Center</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+        :root {
+            --primary: #ff3c4c;
+            --secondary: #ff7b89;
+            --bg: #fff5f5;
+            --text: #2d3436;
+            --accent: #ff8c00;
+            --card-bg: #ffffff;
+            --gradient-1: rgba(255, 60, 76, 0.05);
+            --gradient-2: rgba(255, 123, 137, 0.05);
+            --gradient-3: rgba(255, 140, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 0% 0%, var(--gradient-1) 0%, transparent 50%),
+                radial-gradient(circle at 100% 0%, var(--gradient-2) 0%, transparent 50%),
+                radial-gradient(circle at 50% 100%, var(--gradient-3) 0%, transparent 50%);
+            z-index: -1;
+            animation: gradientMove 20s ease infinite alternate;
+        }
+
+        .background-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.03;
+            animation: shapeFloat 15s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            border: 15px solid var(--primary);
+            top: 20%;
+            left: 10%;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            border: 15px solid var(--secondary);
+            top: 60%;
+            right: 15%;
+            border-radius: 50%;
+            animation-delay: -5s;
+        }
+
+        .shape:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            top: 30%;
+            right: 25%;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            animation-delay: -2s;
+        }
+
+        .shape:nth-child(4) {
+            width: 120px;
+            height: 120px;
+            border: 15px solid var(--primary);
+            bottom: 20%;
+            left: 25%;
+            border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+            animation-delay: -7s;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .logo {
+            font-size: 4.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text);
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255, 60, 76, 0.15);
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+            opacity: 0.1;
+        }
+
+        .card-inner {
+            padding: 3rem;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 320px;
+        }
+
+        .card-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .card-description {
+            color: var(--text);
+            opacity: 0.8;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            flex-grow: 1;
+        }
+
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: fit-content;
+        }
+
+        .card-link:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(255, 60, 76, 0.3);
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(255, 60, 76, 0.2), rgba(255, 123, 137, 0.2));
+            background-repeat: no-repeat;
+            background-size: 100% 0.4em;
+            background-position: 0 88%;
+            display: inline;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 100% 100%;
+            }
+        }
+
+        @keyframes shapeFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+
+            .logo {
+                font-size: 3rem;
+            }
+
+            .card-inner {
+                min-height: auto;
+                padding: 2rem;
+            }
+
+            .shape {
+                opacity: 0.02;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="main-container">
+        <header class="header">
+            <h1 class="logo">TSA</h1>
+            <p class="subtitle">
+                Nơi khơi nguồn <span class="highlight">đam mê học tập</span> và phát triển tư duy toàn diện
+            </p>
+        </header>
+
+        <div class="grid-container">
+            <div class="card">
+                <div class="card-inner">
+                    <div class="card-icon">📐</div>
+                    <h2 class="card-title">Toán Học</h2>
+                    <p class="card-description">
+                        Khám phá thế giới số học qua phương pháp giảng dạy hiện đại, 
+                        giúp bạn phát triển tư duy logic và kỹ năng giải quyết vấn đề.
+                    </p>
+                    <a href="math.html" class="card-link">Bắt đầu học →</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-inner">
+                    <div class="card-icon">📚</div>
+                    <h2 class="card-title">Đọc Hiểu</h2>
+                    <p class="card-description">
+                        Phát triển kỹ năng đọc hiểu và phân tích văn bản chuyên sâu 
+                        thông qua các bài học được thiết kế khoa học.
+                    </p>
+                    <a href="dochieu.html" class="card-link">Khám phá ngay →</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-inner">
+                    <div class="card-icon">🧪</div>
+                    <h2 class="card-title">Khoa Học</h2>
+                    <p class="card-description">
+                        Trải nghiệm thế giới khoa học qua các bài học tương tác và 
+                        thí nghiệm thực tế hấp dẫn.
+                    </p>
+                    <a href="khoahoc.html" class="card-link">Tìm hiểu thêm →</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-inner">
+                    <div class="card-icon">✨</div>
+                    <h2 class="card-title">Đáp Án</h2>
+                    <p class="card-description">
+                        Hệ thống đáp án chi tiết và hướng dẫn giải các dạng bài tập 
+                        từ cơ bản đến nâng cao.
+                    </p>
+                    <a href="dapan.html" class="card-link">Xem ngay →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
