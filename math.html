@@ -60,13 +60,14 @@
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 500px;
-            background: white;
+            background: linear-gradient(145deg, #ffffff, #f5f5f5);
             padding: 2rem;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             text-align: center;
             z-index: 1000;
             transition: var(--transition);
+            animation: floatIn 0.6s ease-out;
         }
 
         .initial-exam-selector.hidden {
@@ -79,6 +80,26 @@
             color: var(--primary);
             margin-bottom: 1.5rem;
             font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: titlePulse 3s infinite;
+        }
+
+        @keyframes titlePulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
         }
 
         .exam-selector {
@@ -92,10 +113,75 @@
             border-radius: var(--border-radius);
             font-size: 1.1rem;
             color: var(--primary);
-            background: white;
+            background: linear-gradient(145deg, #ffffff, #9fd7ff);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+            animation: pulseSelect 2s infinite;
             cursor: pointer;
             transition: var(--transition);
         }
+
+        .exam-selector::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid var(--primary);
+            pointer-events: none;
+            transition: transform 0.3s ease;
+        }
+
+
+        .exam-selector select:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(228, 30, 63, 0.2),
+                inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .exam-selector select option {
+            background: rgb(255, 255, 255);
+            color: var(--primary);
+            padding: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        .exam-selector select option:hover {
+            background-color: rgba(228, 30, 63, 0.1);
+        }
+
+        @keyframes floatIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        @keyframes pulseSelect {
+            0% {
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+
+            50% {
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05),
+                    0 0 15px rgba(228, 30, 63, 0.2);
+            }
+
+            100% {
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+        }
+
 
         .exam-selector select:hover {
             background: rgba(228, 30, 63, 0.1);
@@ -377,12 +463,62 @@
                 padding: 0.5rem;
             }
         }
+
+        .timer {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .header:hover {
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: center;
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 
 <body>
     <header class="header hidden">
         <h1>TSA Testing System</h1>
+        <div class="timer">
+            <span id="countdown">65:00</span>
+        </div>
     </header>
 
     <div class="initial-exam-selector">
@@ -434,8 +570,11 @@
     </div>
 
     <script>
+
         const FOLDER_ID = '1Hng8eJxMsb411NSFAcquxi8i34cS2u4L';
         let currentExam = '';
+        let countdownInterval;
+        let timeLeft;
 
         // Auto fullscreen on load
         document.addEventListener('DOMContentLoaded', function () {
@@ -461,9 +600,9 @@
                 const answerGroup = document.createElement('div');
                 answerGroup.className = 'answer-group';
                 answerGroup.innerHTML = `
-            <label class="answer-label">Câu ${i}:</label>
-            <input type="text" class="answer-input" id="answer${i}" name="answer${i}">
-        `;
+                <label class="answer-label">Câu ${i}:</label>
+                <input type="text" class="answer-input" id="answer${i}" name="answer${i}">
+            `;
                 answerContainer.appendChild(answerGroup);
             }
         }
@@ -491,10 +630,47 @@
             }
         }
 
+        function startCountdown() {
+            timeLeft = 65 * 60; // 65 minutes in seconds
+            updateCountdownDisplay();
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                updateCountdownDisplay();
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    autoSubmit();
+                }
+            }, 1000);
+        }
+
+        function updateCountdownDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('countdown').textContent = display;
+
+            // Add warning colors when time is running low
+            if (timeLeft <= 300) { // Last 5 minutes
+                document.getElementById('countdown').style.color = '#ff4444';
+            }
+        }
+
+        async function autoSubmit() {
+            const confirmSubmit = confirm('Hết thời gian làm bài! Hệ thống sẽ tự động nộp bài.');
+            if (confirmSubmit) {
+                const userName = prompt('Vui lòng nhập tên của bạn để nộp bài:');
+                if (userName) {
+                    document.getElementById('userName').value = userName;
+                    await submitWithName();
+                }
+            }
+        }
+
         document.getElementById('examSelector').addEventListener('change', function (e) {
             const fileId = e.target.value;
             if (fileId) {
-                // Kích hoạt fullscreen khi người dùng chọn đề thi
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(err => {
                         console.log(`Error attempting to enable fullscreen: ${err.message}`);
@@ -512,6 +688,9 @@
                 document.getElementById('pdfViewer').onload = hideLoading;
 
                 loadSavedAnswers();
+
+                // Start the countdown timer
+                startCountdown();
             }
         });
 
@@ -544,6 +723,11 @@
         });
 
         async function submitWithName() {
+            // Clear the countdown interval when submitting
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
             const userName = document.getElementById('userName').value;
             if (!userName) {
                 alert('Vui lòng nhập tên của bạn!');
@@ -584,9 +768,8 @@
                 localStorage.removeItem('savedAnswers');
                 localStorage.removeItem('savedExam');
 
-                // Thêm đoạn code sau để chuyển về trang chủ
-                window.onbeforeunload = null; // Tắt cảnh báo rời trang
-                window.location.href = 'index.html'; // Chuyển về trang chủ
+                window.onbeforeunload = null;
+                window.location.href = 'index.html';
 
             } catch (error) {
                 console.error("Error submitting answers: ", error);
@@ -626,54 +809,56 @@
             });
         }
 
-        // Prevent accidental navigation
-        window.onbeforeunload = function () {
-            return "Bạn có chắc muốn rời khỏi trang? Mọi dữ liệu sẽ bị mất!";
+        // Replace the existing onbeforeunload handler with this more detailed version
+        window.onbeforeunload = function (e) {
+            const message = "CẢNH BÁO: Nếu bạn thoát hoặc tải lại trang, tất cả dữ liệu làm bài sẽ bị mất! Bạn có chắc chắn muốn thoát?";
+            e.preventDefault();
+            e.returnValue = message;
+            return message;
         };
 
-        // Handle keyboard shortcuts
+        // Add more comprehensive prevention for page reloads and navigation
         document.addEventListener('keydown', function (e) {
-            // Alt + A to toggle answer sheet
-            if (e.altKey && e.key === 'a') {
-                toggleAnswerSheet();
-            }
-            // Escape to close modal
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-        // Prevent page reload using different methods
-        window.addEventListener('beforeunload', function (e) {
-            e.preventDefault();
-            e.returnValue = '';
-            return '';
-        });
-
-        // Disable refresh shortcuts
-        document.addEventListener('keydown', function (e) {
-            // Prevent F5 key
+            // Prevent F5
             if (e.key === 'F5') {
                 e.preventDefault();
+                alert('CẢNH BÁO: Không được phép tải lại trang! Dữ liệu sẽ bị mất!');
                 return false;
             }
 
             // Prevent Ctrl + R
-            if (e.ctrlKey && e.key === 'r') {
+            if (e.ctrlKey && (e.key === 'r' || e.key === 'R')) {
                 e.preventDefault();
+                alert('CẢNH BÁO: Không được phép tải lại trang! Dữ liệu sẽ bị mất!');
                 return false;
             }
 
             // Prevent Ctrl + Shift + R
-            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+            if (e.ctrlKey && e.shiftKey && (e.key === 'r' || e.key === 'R')) {
                 e.preventDefault();
+                alert('CẢNH BÁO: Không được phép tải lại trang! Dữ liệu sẽ bị mất!');
+                return false;
+            }
+
+            // Prevent Alt + Left/Right (browser back/forward)
+            if (e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                e.preventDefault();
+                alert('CẢNH BÁO: Không được phép điều hướng! Dữ liệu sẽ bị mất!');
                 return false;
             }
         });
 
-        // Disable right-click context menu to prevent reload
+        // Prevent browser back button
+        window.history.pushState(null, null, window.location.href);
+        window.addEventListener('popstate', function () {
+            window.history.pushState(null, null, window.location.href);
+            alert('CẢNH BÁO: Không được phép sử dụng nút Back! Dữ liệu sẽ bị mất!');
+        });
+
+        // Add warning for right-click context menu
         document.addEventListener('contextmenu', function (e) {
             e.preventDefault();
+            alert('CẢNH BÁO: Menu chuột phải đã bị vô hiệu hóa để tránh mất dữ liệu!');
         });
 
     </script>
