@@ -4,494 +4,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Tạo đề chonghz</title>
+    <title>Hệ thống Tạo đề thi</title>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #64748b;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #3b82f6;
-
-            --gray-50: #f8fafc;
-            --gray-100: #f1f5f9;
-            --gray-200: #e2e8f0;
-            --gray-300: #cbd5e1;
-            --gray-400: #94a3b8;
-            --gray-500: #64748b;
-            --gray-600: #475569;
-            --gray-700: #334155;
-            --gray-800: #1e293b;
-            --gray-900: #0f172a;
-
-            --radius-sm: 0.25rem;
-            --radius: 0.5rem;
-            --radius-lg: 0.75rem;
-
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        }
-
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--gray-100);
-            color: var(--gray-800);
-            line-height: 1.5;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 1rem;
         }
 
-        /* Header Styles */
-        .header {
-            background: white;
-            border-bottom: 1px solid var(--gray-200);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 50;
+        h1,
+        h2,
+        h3 {
+            margin-bottom: 20px;
+            color: #333;
         }
 
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .exam-header {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .header-field {
+            margin-bottom: 15px;
         }
 
-        /* Navigation Styles */
-        .nav {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-link {
-            padding: 0.5rem 1rem;
-            color: var(--gray-600);
-            text-decoration: none;
-            border-radius: var(--radius);
-            transition: all 0.2s;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            background: var(--gray-100);
-            color: var(--primary);
-        }
-
-        /* Main Content Styles */
-        .main {
-            padding: 2rem 0;
-        }
-
-        .card {
-            background: white;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--gray-800);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
+        .header-field label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--gray-700);
+            margin-bottom: 5px;
+            font-weight: bold;
         }
 
-        .form-control {
+        .header-field input {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--gray-300);
-            border-radius: var(--radius);
-            font-size: 1rem;
-            transition: all 0.2s;
-            font-family: inherit;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .header-field input[type="number"] {
+            width: 150px;
         }
 
-        textarea.form-control {
-            min-height: 150px;
+        .reading-section,
+        .question-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             resize: vertical;
         }
 
-        /* Button Styles */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: var(--radius);
-            font-weight: 500;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-secondary {
-            background: var(--gray-200);
-            color: var(--gray-700);
-        }
-
-        .btn-secondary:hover {
-            background: var(--gray-300);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        /* Question Styles */
-        .question-container {
-            background: white;
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid var(--gray-200);
-            position: relative;
-        }
-
-        .question-type-select {
+        select {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--gray-300);
-            border-radius: var(--radius);
-            font-size: 1rem;
-            background: white;
-            cursor: pointer;
-            margin-bottom: 1rem;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
-        .question-options {
-            display: grid;
-            gap: 1rem;
-            margin-top: 1rem;
+        .question-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
         }
 
-        .option-item {
+        .option-container {
+            margin: 10px 0;
+        }
+
+        .option-input {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 0.75rem;
-            background: var(--gray-50);
-            border-radius: var(--radius);
-            border: 1px solid var(--gray-200);
+            margin-bottom: 10px;
         }
 
-        /* Modal Styles */
+        .option-input input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .option-input input[type="radio"],
+        .option-input input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+        }
+
+        .delete-btn:hover {
+            background-color: #da190b;
+        }
+
+        .answer-input {
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .exams-list {
+            margin-top: 30px;
+        }
+
+        .exam-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff;
+        }
+
+        .exam-actions {
+            margin-top: 10px;
+        }
+
+        .exam-actions button {
+            margin-right: 10px;
+        }
+
         .modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
+            background-color: rgba(0, 0, 0, 0.5);
         }
 
         .modal-content {
-            background: white;
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            width: 80%;
+            max-height: 80vh;
             overflow-y: auto;
-            position: relative;
+            border-radius: 5px;
         }
 
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--gray-500);
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
             cursor: pointer;
-            padding: 0.5rem;
         }
 
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 1rem;
-            }
-
-            .card {
-                padding: 1rem;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .modal-content {
-                width: 95%;
-                padding: 1rem;
-            }
+        .close:hover {
+            color: #f44336;
         }
 
-        /* Thêm vào phần CSS */
-        .exam-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+        .tab-container {
+            margin-bottom: 20px;
         }
 
-        .exam-info {
-            display: flex;
-            gap: 1rem;
-            color: var(--gray-600);
+        .tab-button {
+            padding: 10px 20px;
+            margin-right: 5px;
+            background-color: #f1f1f1;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
 
-        .exam-info span {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .exam-section {
-            margin: 1.5rem 0;
-        }
-
-        .exam-section h3 {
-            margin-bottom: 1rem;
-            color: var(--gray-700);
-        }
-
-        .reading-content {
-            padding: 1rem;
-            background: var(--gray-50);
-            border-radius: var(--radius);
-            border: 1px solid var(--gray-200);
-        }
-
-        .question-item {
-            padding: 1rem;
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            margin-bottom: 1rem;
-        }
-
-        .question-item h4 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .options-list {
-            margin-top: 0.5rem;
-        }
-
-        .option {
-            padding: 0.5rem;
-            margin: 0.25rem 0;
-            background: var(--gray-50);
-            border-radius: var(--radius-sm);
-        }
-
-        .option.correct {
-            background: var(--success);
+        .tab-button.active {
+            background-color: #4CAF50;
             color: white;
-        }
-
-        .text-center {
-            text-align: center;
         }
     </style>
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container header-content">
-            <a href="#" class="logo">
-                <i class="fas fa-graduation-cap"></i>
-                Hệ thống tạo đề
-            </a>
-            <nav class="nav">
-                <a href="#" class="nav-link active" data-tab="create">
-                    <i class="fas fa-plus"></i> Tạo đề thi
-                </a>
-                <a href="#" class="nav-link" data-tab="list">
-                    <i class="fas fa-list"></i> Danh sách
-                </a>
-            </nav>
+    <div class="container">
+        <div class="tab-container">
+            <button class="tab-button active" onclick="showTab('create')">Tạo đề thi</button>
+            <button class="tab-button" onclick="showTab('list')">Danh sách đề thi</button>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="main">
-        <div class="container">
-            <!-- Create Exam Tab -->
-            <div id="create-tab" class="tab-content">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-file-alt"></i> Thông tin đề thi
-                        </h2>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="exam-title">Tiêu đề đề thi</label>
-                        <input type="text" id="exam-title" class="form-control" placeholder="Nhập tiêu đề đề thi...">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="exam-time">Thời gian làm bài (phút)</label>
-                        <input type="number" id="exam-time" class="form-control" min="1"
-                            placeholder="Nhập thời gian...">
-                    </div>
+        <div id="create-tab">
+            <h1>Tạo đề thi mới</h1>
+
+            <div class="exam-header">
+                <div class="header-field">
+                    <label for="exam-title">Tiêu đề đề thi:</label>
+                    <input type="text" id="exam-title" placeholder="Nhập tiêu đề đề thi...">
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-book"></i> Bài đọc
-                        </h2>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="reading-text" class="form-control"
-                            placeholder="Nhập nội dung bài đọc..."></textarea>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-question-circle"></i> Câu hỏi
-                        </h2>
-                    </div>
-                    <div class="form-group">
-                        <select id="question-type" class="question-type-select">
-                            <option value="">-- Chọn loại câu hỏi --</option>
-                            <option value="single">Trắc nghiệm một đáp án</option>
-                            <option value="multiple">Trắc nghiệm nhiều đáp án</option>
-                            <option value="fill">Điền khuyết</option>
-                        </select>
-                    </div>
-                    <div id="question-form" style="display: none;">
-                        <div class="form-group">
-                            <textarea id="question-text" class="form-control" placeholder="Nhập câu hỏi..."></textarea>
-                        </div>
-                        <div id="options-container" class="question-options"></div>
-                        <button class="btn btn-primary" onclick="addQuestion()">
-                            <i class="fas fa-plus"></i> Thêm câu hỏi
-                        </button>
-                    </div>
-                    <div id="questions-list"></div>
-                    <div class="form-group" style="margin-top: 2rem;">
-                        <button class="btn btn-primary" onclick="saveExam()">
-                            <i class="fas fa-save"></i> Lưu đề thi
-                        </button>
-                    </div>
+                <div class="header-field">
+                    <label for="exam-time">Thời gian làm bài (phút):</label>
+                    <input type="number" id="exam-time" min="1" placeholder="Nhập thời gian...">
                 </div>
             </div>
 
-            <!-- List Exam Tab -->
-            <div id="list-tab" class="tab-content" style="display: none;">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-list"></i> Danh sách đề thi
-                        </h2>
-                    </div>
-                    <div id="exams-list"></div>
+            <div class="reading-section">
+                <h2>Bài đọc</h2>
+                <textarea id="reading-text" placeholder="Nhập bài văn vào đây..."></textarea>
+            </div>
+
+            <div class="question-section">
+                <h2>Danh sách câu hỏi</h2>
+                <select id="question-type" onchange="showQuestionForm()">
+                    <option value="">-- Chọn loại câu hỏi --</option>
+                    <option value="single">Trắc nghiệm một đáp án</option>
+                    <option value="multiple">Trắc nghiệm nhiều đáp án</option>
+                    <option value="fill">Điền khuyết</option>
+                </select>
+
+                <div id="question-form" style="display: none;">
+                    <textarea id="question-text" placeholder="Nhập câu hỏi..."></textarea>
+                    <div id="options-container"></div>
+                    <button onclick="addQuestion()">Thêm câu hỏi</button>
                 </div>
+
+                <div id="questions-list"></div>
+
+                <button onclick="saveExam()">Lưu đề thi</button>
             </div>
         </div>
-    </main>
 
-    <!-- View Exam Modal -->
-    <div id="view-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal()">
-                <i class="fas fa-times"></i>
-            </button>
-            <div id="exam-detail"></div>
+        <div id="list-tab" style="display: none;">
+            <h1>Danh sách đề thi</h1>
+            <div id="exams-list"></div>
         </div>
     </div>
 
+    <div id="view-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="exam-detail"></div>
+        </div>
+    </div>
     <script>
-        // Firebase configuration
+        // Cấu hình Firebase - Thay thế bằng cấu hình của bạn
         const firebaseConfig = {
             apiKey: "AIzaSyD_M7bicSb7lthu_UwrWNjX5jKY_53DyCY",
             authDomain: "tsa-2-598c8.firebaseapp.com",
@@ -502,7 +297,7 @@
             measurementId: "G-59MRPM3XMK"
         };
 
-        // Initialize Firebase
+        // Khởi tạo Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -510,39 +305,22 @@
         let currentQuestionType = '';
         let currentExamId = null;
 
-        // Tab switching
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const tabId = e.target.closest('.nav-link').dataset.tab;
-                showTab(tabId);
+        // Xử lý tabs
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
             });
-        });
+            document.querySelector(`button[onclick="showTab('${tabName}')"]`).classList.add('active');
 
-        function showTab(tabId) {
-            // Update navigation
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-                if (link.dataset.tab === tabId) {
-                    link.classList.add('active');
-                }
-            });
-
-            // Show/hide content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.style.display = 'none';
-            });
-            document.getElementById(`${tabId}-tab`).style.display = 'block';
-
-            if (tabId === 'list') {
+            if (tabName === 'create') {
+                document.getElementById('create-tab').style.display = 'block';
+                document.getElementById('list-tab').style.display = 'none';
+            } else {
+                document.getElementById('create-tab').style.display = 'none';
+                document.getElementById('list-tab').style.display = 'block';
                 loadExams();
             }
         }
-
-        // Question type handling
-        document.getElementById('question-type').addEventListener('change', function () {
-            showQuestionForm();
-        });
 
         function showQuestionForm() {
             const questionType = document.getElementById('question-type').value;
@@ -561,43 +339,38 @@
             if (questionType === 'single' || questionType === 'multiple') {
                 for (let i = 0; i < 4; i++) {
                     const optionDiv = document.createElement('div');
-                    optionDiv.className = 'option-item';
+                    optionDiv.className = 'option-input';
 
                     const input = document.createElement('input');
                     input.type = questionType === 'single' ? 'radio' : 'checkbox';
                     input.name = 'correct-answer';
-                    input.id = `option-${i}`;
-                    input.className = 'option-input';
+                    input.value = i;
 
-                    const textInput = document.createElement('input');
-                    textInput.type = 'text';
-                    textInput.className = 'form-control';
-                    textInput.placeholder = `Đáp án ${i + 1}`;
+                    const optionText = document.createElement('input');
+                    optionText.type = 'text';
+                    optionText.placeholder = `Đáp án ${i + 1}`;
 
                     optionDiv.appendChild(input);
-                    optionDiv.appendChild(textInput);
+                    optionDiv.appendChild(optionText);
                     optionsContainer.appendChild(optionDiv);
                 }
             } else if (questionType === 'fill') {
-                const helpText = document.createElement('div');
-                helpText.className = 'help-text';
-                helpText.innerHTML = '<i class="fas fa-info-circle"></i> Nhập câu văn và đặt dấu [...] tại vị trí cần điền.';
+                const helpText = document.createElement('p');
+                helpText.textContent = 'Nhập câu văn và đặt dấu [...] tại vị trí cần điền.';
+                optionsContainer.appendChild(helpText);
 
                 const answerInput = document.createElement('input');
                 answerInput.type = 'text';
-                answerInput.className = 'form-control';
+                answerInput.className = 'answer-input';
                 answerInput.placeholder = 'Nhập đáp án cho phần điền khuyết...';
-
-                optionsContainer.appendChild(helpText);
                 optionsContainer.appendChild(answerInput);
             }
         }
 
         function addQuestion() {
-            const questionText = document.getElementById('question-text').value.trim();
-
-            if (!questionText) {
-                showAlert('Vui lòng nhập câu hỏi!', 'error');
+            const questionText = document.getElementById('question-text').value;
+            if (!questionText.trim()) {
+                alert('Vui lòng nhập câu hỏi!');
                 return;
             }
 
@@ -609,15 +382,15 @@
             };
 
             if (currentQuestionType === 'single' || currentQuestionType === 'multiple') {
-                const optionInputs = document.querySelectorAll('.option-item');
+                const optionInputs = document.querySelectorAll('.option-input');
                 let hasCorrectAnswer = false;
 
                 optionInputs.forEach((optionDiv, index) => {
-                    const optionText = optionDiv.querySelector('input[type="text"]').value.trim();
-                    const isCorrect = optionDiv.querySelector('.option-input').checked;
+                    const optionText = optionDiv.querySelector('input[type="text"]').value;
+                    const isCorrect = optionDiv.querySelector('input[type="radio"], input[type="checkbox"]').checked;
 
-                    if (!optionText) {
-                        showAlert('Vui lòng nhập đầy đủ các đáp án!', 'error');
+                    if (!optionText.trim()) {
+                        alert('Vui lòng nhập đầy đủ các đáp án!');
                         return;
                     }
 
@@ -629,18 +402,18 @@
                 });
 
                 if (!hasCorrectAnswer) {
-                    showAlert('Vui lòng chọn ít nhất một đáp án đúng!', 'error');
+                    alert('Vui lòng chọn ít nhất một đáp án đúng!');
                     return;
                 }
             } else if (currentQuestionType === 'fill') {
-                if (!questionText.includes('[...]')) {
-                    showAlert('Vui lòng đặt dấu [...] tại vị trí cần điền!', 'error');
+                if (!questionText.includes('_____')) {
+                    alert('Vui lòng đặt dấu [...] tại vị trí cần điền!');
                     return;
                 }
 
-                const answer = optionsContainer.querySelector('input[type="text"]').value.trim();
-                if (!answer) {
-                    showAlert('Vui lòng nhập đáp án cho phần điền khuyết!', 'error');
+                const answer = document.querySelector('.answer-input').value;
+                if (!answer.trim()) {
+                    alert('Vui lòng nhập đáp án cho phần điền khuyết!');
                     return;
                 }
                 question.correctAnswers = [answer];
@@ -648,8 +421,7 @@
 
             questions.push(question);
             displayQuestions();
-            resetQuestionForm();
-            showAlert('Đã thêm câu hỏi thành công!', 'success');
+            resetForm();
         }
 
         function displayQuestions() {
@@ -660,69 +432,70 @@
                 const questionDiv = document.createElement('div');
                 questionDiv.className = 'question-container';
 
-                let questionContent = `
-                    <div class="question-header">
-                        <h3 class="question-title">Câu ${index + 1}</h3>
-                        <button class="btn btn-danger btn-sm" onclick="deleteQuestion(${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                    <p class="question-text">${question.text}</p>
-                `;
+                let questionContent = `<h3>Câu ${index + 1}</h3>
+                                     <p>${question.text}</p>`;
 
                 if (question.type === 'fill') {
-                    questionContent += `
-                        <div class="answer-section">
-                            <p class="answer-label">Đáp án:</p>
-                            <p class="answer-text">${question.correctAnswers[0]}</p>
-                        </div>
-                    `;
+                    questionContent += `<p>Đáp án: ${question.correctAnswers[0]}</p>`;
                 } else {
-                    questionContent += '<div class="options-list">';
+                    questionContent += '<ul>';
                     question.options.forEach((option, optIndex) => {
                         const isCorrect = question.correctAnswers.includes(optIndex);
                         questionContent += `
-                            <div class="option-item ${isCorrect ? 'correct' : ''}">
-                                <span class="option-marker">${isCorrect ? '✓' : ''}</span>
-                                <span class="option-text">${option}</span>
-                            </div>
-                        `;
+                            <li style="color: ${isCorrect ? 'green' : 'black'}">
+                                ${option} ${isCorrect ? '✓' : ''}
+                            </li>`;
                     });
-                    questionContent += '</div>';
+                    questionContent += '</ul>';
                 }
 
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Xóa';
+                deleteButton.className = 'delete-btn';
+                deleteButton.onclick = () => deleteQuestion(index);
+
                 questionDiv.innerHTML = questionContent;
+                questionDiv.appendChild(deleteButton);
                 questionsList.appendChild(questionDiv);
             });
         }
 
         function deleteQuestion(index) {
-            if (confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')) {
-                questions.splice(index, 1);
-                displayQuestions();
-                showAlert('Đã xóa câu hỏi thành công!', 'success');
-            }
+            questions.splice(index, 1);
+            displayQuestions();
         }
 
-        function resetQuestionForm() {
+        function resetForm() {
             document.getElementById('question-type').value = '';
             document.getElementById('question-text').value = '';
             document.getElementById('question-form').style.display = 'none';
-            document.getElementById('options-container').innerHTML = '';
         }
 
         async function saveExam() {
-            const examTitle = document.getElementById('exam-title').value.trim();
+            const examTitle = document.getElementById('exam-title').value;
             const examTime = document.getElementById('exam-time').value;
-            const readingText = document.getElementById('reading-text').value.trim();
+            const readingText = document.getElementById('reading-text').value;
 
-            if (!validateExam(examTitle, examTime, readingText)) {
+            if (!examTitle.trim()) {
+                alert('Vui lòng nhập tiêu đề đề thi!');
+                return;
+            }
+            if (!examTime || examTime <= 0) {
+                alert('Vui lòng nhập thời gian làm bài hợp lệ!');
+                return;
+            }
+            if (!readingText.trim()) {
+                alert('Vui lòng nhập bài đọc!');
+                return;
+            }
+            if (questions.length === 0) {
+                alert('Vui lòng thêm ít nhất một câu hỏi!');
                 return;
             }
 
             const exam = {
                 title: examTitle,
-                time: parseInt(examTime),
+                time: examTime,
                 reading: readingText,
                 questions: questions,
                 createdAt: new Date().toISOString()
@@ -730,62 +503,29 @@
 
             try {
                 if (currentExamId) {
+                    // Cập nhật đề thi hiện có
                     await database.ref(`exams/${currentExamId}`).update(exam);
-                    showAlert('Đã cập nhật đề thi thành công!', 'success');
+                    alert('Đã cập nhật đề thi thành công!');
                 } else {
-                    await database.ref('exams').push(exam);
-                    showAlert('Đã lưu đề thi thành công!', 'success');
+                    // Tạo đề thi mới
+                    const newExamRef = database.ref('exams').push();
+                    await newExamRef.set(exam);
+                    alert('Đã lưu đề thi thành công!');
                 }
                 resetAllForms();
                 showTab('list');
             } catch (error) {
-                showAlert(`Lỗi: ${error.message}`, 'error');
+                alert('Lỗi khi lưu đề thi: ' + error.message);
             }
         }
 
-        function validateExam(title, time, reading) {
-            if (!title) {
-                showAlert('Vui lòng nhập tiêu đề đề thi!', 'error');
-                return false;
-            }
-            if (!time || time <= 0) {
-                showAlert('Vui lòng nhập thời gian làm bài hợp lệ!', 'error');
-                return false;
-            }
-            if (!reading) {
-                showAlert('Vui lòng nhập bài đọc!', 'error');
-                return false;
-            }
-            if (questions.length === 0) {
-                showAlert('Vui lòng thêm ít nhất một câu hỏi!', 'error');
-                return false;
-            }
-            return true;
-        }
-
-        function showAlert(message, type) {
-            // Implement your alert/notification system here
-            alert(message);
-        }
-
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', () => {
-            loadExams();
-        });
         function resetAllForms() {
-            // Reset exam info
             document.getElementById('exam-title').value = '';
             document.getElementById('exam-time').value = '';
             document.getElementById('reading-text').value = '';
-
-            // Reset questions
             questions = [];
             currentExamId = null;
-
-            // Reset question form
-            resetQuestionForm();
-
-            // Reset display
+            resetForm();
             displayQuestions();
         }
 
@@ -802,111 +542,83 @@
             examsList.innerHTML = '';
 
             if (!examsData) {
-                examsList.innerHTML = '<p class="text-center">Chưa có đề thi nào.</p>';
+                examsList.innerHTML = '<p>Chưa có đề thi nào.</p>';
                 return;
             }
 
             Object.keys(examsData).forEach(key => {
                 const exam = examsData[key];
                 const examElement = document.createElement('div');
-                examElement.className = 'question-container';
+                examElement.className = 'exam-item';
                 examElement.innerHTML = `
-            <div class="exam-header">
-                <h3>${exam.title}</h3>
-                <div class="exam-info">
-                    <span><i class="fas fa-clock"></i> ${exam.time} phút</span>
-                    <span><i class="fas fa-question-circle"></i> ${exam.questions.length} câu hỏi</span>
-                </div>
-            </div>
-            <div class="exam-actions">
-                <button class="btn btn-primary" onclick="viewExam('${key}')">
-                    <i class="fas fa-eye"></i> Xem
-                </button>
-                <button class="btn btn-secondary" onclick="editExam('${key}')">
-                    <i class="fas fa-edit"></i> Sửa
-                </button>
-                <button class="btn btn-danger" onclick="deleteExam('${key}')">
-                    <i class="fas fa-trash"></i> Xóa
-                </button>
-            </div>
-        `;
+                    <h3>${exam.title}</h3>
+                    <p>Thời gian: ${exam.time} phút</p>
+                    <p>Số câu hỏi: ${exam.questions.length}</p>
+                    <div class="exam-actions">
+                        <button onclick="viewExam('${key}')">Xem</button>
+                        <button onclick="editExam('${key}')">Sửa</button>
+                        <button class="delete-btn" onclick="deleteExam('${key}')">Xóa</button>
+                    </div>
+                `;
                 examsList.appendChild(examElement);
             });
         }
 
         async function viewExam(examId) {
-            try {
-                const snapshot = await database.ref(`exams/${examId}`).once('value');
-                const exam = snapshot.val();
+            const examRef = database.ref(`exams/${examId}`);
+            const snapshot = await examRef.once('value');
+            const exam = snapshot.val();
 
-                const modal = document.getElementById('view-modal');
-                const examDetail = document.getElementById('exam-detail');
+            const modal = document.getElementById('view-modal');
+            const examDetail = document.getElementById('exam-detail');
 
-                examDetail.innerHTML = `
-            <h2 class="modal-title">${exam.title}</h2>
-            <div class="exam-info">
-                <p><strong><i class="fas fa-clock"></i> Thời gian:</strong> ${exam.time} phút</p>
-            </div>
-            <div class="exam-section">
-                <h3><i class="fas fa-book"></i> Bài đọc:</h3>
-                <div class="reading-content">${exam.reading}</div>
-            </div>
-            <div class="exam-section">
-                <h3><i class="fas fa-questions"></i> Danh sách câu hỏi:</h3>
+            examDetail.innerHTML = `
+                <h2>${exam.title}</h2>
+                <p><strong>Thời gian:</strong> ${exam.time} phút</p>
+                <h3>Bài đọc:</h3>
+                <div class="reading-text">${exam.reading}</div>
+                <h3>Câu hỏi:</h3>
                 ${exam.questions.map((q, i) => `
-                    <div class="question-item">
+                    <div class="question-container">
                         <h4>Câu ${i + 1}</h4>
                         <p>${q.text}</p>
                         ${q.type === 'fill'
-                        ? `<p class="answer"><strong>Đáp án:</strong> ${q.correctAnswers[0]}</p>`
-                        : `<div class="options-list">
-                                ${q.options.map((opt, index) => `
-                                    <div class="option ${q.correctAnswers.includes(index) ? 'correct' : ''}">
-                                        ${opt} ${q.correctAnswers.includes(index) ? '✓' : ''}
-                                    </div>
-                                `).join('')}
-                            </div>`
-                    }
+                    ? `<p><strong>Đáp án:</strong> ${q.correctAnswers[0]}</p>`
+                    : `<ul>${q.options.map((opt, index) => `
+                                <li style="color: ${q.correctAnswers.includes(index) ? 'green' : 'black'}">
+                                    ${opt} ${q.correctAnswers.includes(index) ? '✓' : ''}
+                                </li>`).join('')}
+                                </ul>`}
                     </div>
                 `).join('')}
-            </div>
-        `;
+            `;
 
-                modal.style.display = 'block';
-            } catch (error) {
-                showAlert(`Lỗi khi tải đề thi: ${error.message}`, 'error');
-            }
+            modal.style.display = 'block';
         }
 
         async function editExam(examId) {
-            try {
-                const snapshot = await database.ref(`exams/${examId}`).once('value');
-                const exam = snapshot.val();
+            const examRef = database.ref(`exams/${examId}`);
+            const snapshot = await examRef.once('value');
+            const exam = snapshot.val();
 
-                // Populate form with exam data
-                document.getElementById('exam-title').value = exam.title;
-                document.getElementById('exam-time').value = exam.time;
-                document.getElementById('reading-text').value = exam.reading;
+            document.getElementById('exam-title').value = exam.title;
+            document.getElementById('exam-time').value = exam.time;
+            document.getElementById('reading-text').value = exam.reading;
 
-                // Set questions
-                questions = exam.questions;
-                currentExamId = examId;
+            questions = exam.questions;
+            currentExamId = examId;
 
-                // Update display
-                displayQuestions();
-                showTab('create');
-            } catch (error) {
-                showAlert(`Lỗi khi tải đề thi: ${error.message}`, 'error');
-            }
+            displayQuestions();
+            showTab('create');
         }
 
         async function deleteExam(examId) {
             if (confirm('Bạn có chắc chắn muốn xóa đề thi này?')) {
                 try {
                     await database.ref(`exams/${examId}`).remove();
-                    showAlert('Đã xóa đề thi thành công!', 'success');
+                    alert('Đã xóa đề thi thành công!');
                 } catch (error) {
-                    showAlert(`Lỗi khi xóa đề thi: ${error.message}`, 'error');
+                    alert('Lỗi khi xóa đề thi: ' + error.message);
                 }
             }
         }
@@ -915,13 +627,16 @@
             document.getElementById('view-modal').style.display = 'none';
         }
 
-        // Close modal when clicking outside
+        // Đóng modal khi click ngoài modal
         window.onclick = function (event) {
             const modal = document.getElementById('view-modal');
             if (event.target === modal) {
                 modal.style.display = 'none';
             }
         }
+
+        // Load danh sách đề thi khi trang được tải
+        loadExams();
     </script>
 </body>
 
