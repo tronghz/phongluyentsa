@@ -200,13 +200,14 @@
         }
 
         .reading-content {
-    max-width: 800px;
-    margin: 0 auto;
-    font-size: 16px;
-    line-height: 1.8;
-    color: var(--text-color);
-    white-space: pre-wrap; /* Thêm dòng này */
-}
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-color);
+            white-space: pre-wrap;
+            /* Thêm dòng này */
+        }
 
         .questions-section {
             flex: 0 0 50%;
@@ -387,8 +388,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideUp {
@@ -396,6 +402,7 @@
                 opacity: 0;
                 transform: translateY(40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -403,9 +410,17 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         @media (max-width: 768px) {
@@ -451,6 +466,138 @@
                 gap: 16px;
             }
         }
+
+        /* Style cho container chung của câu đúng/sai */
+        .true-false-item {
+            margin: 15px 0;
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .true-false-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Style cho phần text của phát biểu */
+        .statement-text {
+            margin-bottom: 12px;
+            font-size: 1rem;
+            color: #2c3e50;
+            line-height: 1.5;
+        }
+
+        /* Container cho options Đúng/Sai */
+        .true-false-options {
+            display: flex;
+            gap: 30px;
+            padding: 10px 0;
+        }
+
+        /* Style cho từng option */
+        .true-false-options label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: white;
+            border: 1px solid #dee2e6;
+        }
+
+        .true-false-options label:hover {
+            background-color: #e9ecef;
+        }
+
+        /* Style cho radio buttons */
+        .true-false-options input[type="radio"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #6c757d;
+            border-radius: 50%;
+            outline: none;
+            margin: 0;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* Hiệu ứng khi radio button được chọn */
+        .true-false-options input[type="radio"]:checked {
+            border-color: #2196F3;
+            background-color: #2196F3;
+        }
+
+        .true-false-options input[type="radio"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        /* Style cho text Đúng/Sai */
+        .true-false-options label span {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        /* Màu sắc khác nhau cho Đúng/Sai */
+        .true-false-options label:first-child {
+            border-color: #28a745;
+        }
+
+        .true-false-options label:first-child:hover {
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+
+        .true-false-options label:last-child {
+            border-color: #dc3545;
+        }
+
+        .true-false-options label:last-child:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        /* Style khi được chọn */
+        .true-false-options input[type="radio"]:checked+span {
+            color: #2196F3;
+            font-weight: 600;
+        }
+
+        /* Hiển thị kết quả */
+        .true-false-item.correct {
+            border-left: 4px solid #28a745;
+        }
+
+        .true-false-item.incorrect {
+            border-left: 4px solid #dc3545;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .true-false-options {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .true-false-options label {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 
@@ -461,13 +608,13 @@
             <h2>Chọn đề thi của bạn</h2>
             <p class="select-subtitle">Vui lòng chọn một đề thi để bắt đầu</p>
         </div>
-        
+
         <div class="select-wrapper">
             <select class="exam-select" id="exam-list">
                 <option value="">-- Chọn đề thi --</option>
             </select>
         </div>
-        
+
         <div class="exam-info">
             <div class="info-item">
                 <i class="info-icon">⏱️</i>
@@ -664,29 +811,57 @@
         function getQuestionInput(question, index) {
             if (question.type === 'fill') {
                 return `
-                    <input type="text" 
-                           class="fill-input" 
-                           data-question="${index}" 
-                           placeholder="Nhập câu trả lời...">
-                `;
+            <input type="text" 
+                   class="fill-input" 
+                   data-question="${index}" 
+                   placeholder="Nhập câu trả lời...">
+        `;
+            } else if (question.type === 'trueFalse') {
+                return `
+            <div class="options">
+                ${question.options.map((statement, stmtIndex) => `
+                    <div class="true-false-item">
+                        <p class="statement-text">${statement}</p>
+                        <div class="true-false-options">
+                            <label>
+                                <input type="radio" 
+                                       name="question${index}_${stmtIndex}" 
+                                       value="true"
+                                       data-question="${index}"
+                                       data-statement="${stmtIndex}">
+                                <span>Đúng</span>
+                            </label>
+                            <label>
+                                <input type="radio" 
+                                       name="question${index}_${stmtIndex}" 
+                                       value="false"
+                                       data-question="${index}"
+                                       data-statement="${stmtIndex}">
+                                <span>Sai</span>
+                            </label>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
             }
 
             const inputType = question.type === 'single' ? 'radio' : 'checkbox';
             return `
-                <div class="options">
-                    ${question.options.map((option, optIndex) => `
-                        <div class="option">
-                            <label>
-                                <input type="${inputType}" 
-                                       name="question${index}" 
-                                       value="${optIndex}"
-                                       data-question="${index}">
-                                <span>${option}</span>
-                            </label>
-                        </div>
-                    `).join('')}
+        <div class="options">
+            ${question.options.map((option, optIndex) => `
+                <div class="option">
+                    <label>
+                        <input type="${inputType}" 
+                               name="question${index}" 
+                               value="${optIndex}"
+                               data-question="${index}">
+                        <span>${option}</span>
+                    </label>
                 </div>
-            `;
+            `).join('')}
+        </div>
+    `;
         }
 
         // Xử lý đồng hồ đếm ngược
@@ -740,6 +915,15 @@
                 if (question.type === 'fill') {
                     const input = document.querySelector(`input[data-question="${index}"]`);
                     answers.push(input.value.trim());
+                } else if (question.type === 'trueFalse') {
+                    const statements = [];
+                    question.options.forEach((_, stmtIndex) => {
+                        const selected = document.querySelector(
+                            `input[name="question${index}_${stmtIndex}"]:checked`
+                        );
+                        statements.push(selected ? selected.value === 'true' : null);
+                    });
+                    answers.push(statements);
                 } else {
                     const selected = Array.from(
                         document.querySelectorAll(`input[data-question="${index}"]:checked`)
@@ -761,6 +945,15 @@
                         correct: userAnswer.toLowerCase() === correctAnswer[0].toLowerCase(),
                         userAnswer,
                         correctAnswer: correctAnswer[0]
+                    };
+                } else if (question.type === 'trueFalse') {
+                    const isCorrect = userAnswer.every((ans, i) =>
+                        ans === correctAnswer[i]
+                    );
+                    return {
+                        correct: isCorrect,
+                        userAnswer,
+                        correctAnswer
                     };
                 }
 
@@ -814,6 +1007,15 @@
         function formatAnswer(answer, question) {
             if (question.type === 'fill') {
                 return answer || '<em>Chưa trả lời</em>';
+            }
+
+            if (question.type === 'trueFalse') {
+                if (!Array.isArray(answer) || answer.some(ans => ans === null)) {
+                    return '<em>Chưa trả lời đầy đủ</em>';
+                }
+                return question.options.map((statement, i) =>
+                    `${statement}: ${answer[i] ? 'Đúng' : 'Sai'}`
+                ).join('<br>');
             }
 
             if (!Array.isArray(answer) || answer.length === 0) {
@@ -878,7 +1080,7 @@
                 document.msExitFullscreen();
             }
         }
-        
+
     </script>
 </body>
 

@@ -222,6 +222,40 @@
             background-color: #4CAF50;
             color: white;
         }
+
+        .trueFalse-statement {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .statement-text {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+
+        .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .radio-group label {
+            margin-right: 20px;
+        }
+
+        .option-input button,
+        .trueFalse-statement button {
+            padding: 5px 10px;
+            margin-left: 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -259,6 +293,7 @@
                     <option value="single">Trắc nghiệm một đáp án</option>
                     <option value="multiple">Trắc nghiệm nhiều đáp án</option>
                     <option value="fill">Điền khuyết</option>
+                    <option value="trueFalse">Đúng/Sai</option>
                 </select>
 
                 <div id="question-form" style="display: none;">
@@ -297,346 +332,570 @@
             measurementId: "G-59MRPM3XMK"
         };
 
-        // Khởi tạo Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+// Khởi tạo Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
-        let questions = [];
-        let currentQuestionType = '';
-        let currentExamId = null;
+let questions = [];
+let currentQuestionType = '';
+let currentExamId = null;
 
-        // Xử lý tabs
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`button[onclick="showTab('${tabName}')"]`).classList.add('active');
+// Xử lý tabs
+function showTab(tabName) {
+    try {
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`button[onclick="showTab('${tabName}')"]`).classList.add('active');
 
-            if (tabName === 'create') {
-                document.getElementById('create-tab').style.display = 'block';
-                document.getElementById('list-tab').style.display = 'none';
+        if (tabName === 'create') {
+            document.getElementById('create-tab').style.display = 'block';
+            document.getElementById('list-tab').style.display = 'none';
+        } else {
+            document.getElementById('create-tab').style.display = 'none';
+            document.getElementById('list-tab').style.display = 'block';
+            loadExams();
+        }
+    } catch (error) {
+        console.error('Error in showTab:', error);
+    }
+}
+
+function showQuestionForm() {
+    try {
+        const questionType = document.getElementById('question-type').value;
+        const questionForm = document.getElementById('question-form');
+        const optionsContainer = document.getElementById('options-container');
+
+        if (!questionType) {
+            questionForm.style.display = 'none';
+            return;
+        }
+
+        currentQuestionType = questionType;
+        questionForm.style.display = 'block';
+        optionsContainer.innerHTML = '';
+
+        if (questionType === 'single' || questionType === 'multiple') {
+            // Thêm nút để tạo thêm đáp án
+            const addOptionBtn = document.createElement('button');
+            addOptionBtn.textContent = 'Thêm đáp án';
+            addOptionBtn.type = 'button';
+            addOptionBtn.onclick = addNewOption;
+            
+            const optionsWrapper = document.createElement('div');
+            optionsWrapper.id = 'options-wrapper';
+            optionsContainer.appendChild(optionsWrapper);
+            optionsContainer.appendChild(addOptionBtn);
+
+            // Tạo 4 đáp án mặc định
+            for (let i = 0; i < 4; i++) {
+                addNewOption();
+            }
+        } else if (questionType === 'trueFalse') {
+            // Thêm container cho các câu đúng/sai
+            const trueFalseContainer = document.createElement('div');
+            trueFalseContainer.id = 'trueFalse-container';
+            
+            // Thêm nút để tạo thêm câu đúng/sai
+            const addTrueFalseBtn = document.createElement('button');
+            addTrueFalseBtn.textContent = 'Thêm câu đúng/sai';
+            addTrueFalseBtn.type = 'button';
+            addTrueFalseBtn.onclick = addNewTrueFalse;
+            
+            optionsContainer.appendChild(trueFalseContainer);
+            optionsContainer.appendChild(addTrueFalseBtn);
+            
+            // Tạo 1 câu đúng/sai mặc định
+            addNewTrueFalse();
+        } else if (questionType === 'fill') {
+            const helpText = document.createElement('p');
+            helpText.textContent = 'Nhập câu văn và đặt dấu [...] tại vị trí cần điền.';
+            optionsContainer.appendChild(helpText);
+
+            const answerInput = document.createElement('input');
+            answerInput.type = 'text';
+            answerInput.className = 'answer-input';
+            answerInput.placeholder = 'Nhập đáp án cho phần điền khuyết...';
+            optionsContainer.appendChild(answerInput);
+        }
+    } catch (error) {
+        console.error('Error in showQuestionForm:', error);
+        alert('Đã xảy ra lỗi khi hiển thị form câu hỏi');
+    }
+}
+
+function addNewOption() {
+    try {
+        const optionsWrapper = document.getElementById('options-wrapper');
+        const optionCount = optionsWrapper.getElementsByClassName('option-input').length;
+
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option-input';
+
+        const input = document.createElement('input');
+        input.type = currentQuestionType === 'single' ? 'radio' : 'checkbox';
+        input.name = 'correct-answer';
+        input.value = optionCount;
+
+        const optionText = document.createElement('input');
+        optionText.type = 'text';
+        optionText.placeholder = `Đáp án ${optionCount + 1}`;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Xóa';
+        deleteBtn.type = 'button';
+        deleteBtn.onclick = () => {
+            if (optionsWrapper.getElementsByClassName('option-input').length > 2) {
+                optionDiv.remove();
             } else {
-                document.getElementById('create-tab').style.display = 'none';
-                document.getElementById('list-tab').style.display = 'block';
-                loadExams();
+                alert('Phải có ít nhất 2 đáp án');
             }
+        };
+
+        optionDiv.appendChild(input);
+        optionDiv.appendChild(optionText);
+        optionDiv.appendChild(deleteBtn);
+        
+        optionsWrapper.appendChild(optionDiv);
+    } catch (error) {
+        console.error('Error in addNewOption:', error);
+    }
+}
+
+function addNewTrueFalse() {
+    try {
+        const container = document.getElementById('trueFalse-container');
+        const statementCount = container.getElementsByClassName('trueFalse-statement').length;
+
+        const statementDiv = document.createElement('div');
+        statementDiv.className = 'trueFalse-statement';
+
+        const statementText = document.createElement('input');
+        statementText.type = 'text';
+        statementText.placeholder = `Phát biểu ${statementCount + 1}`;
+        statementText.className = 'statement-text';
+
+        const radioDiv = document.createElement('div');
+        radioDiv.className = 'radio-group';
+
+        const radioTrue = document.createElement('input');
+        radioTrue.type = 'radio';
+        radioTrue.name = `statement-${statementCount}`;
+        radioTrue.value = 'true';
+
+        const radioFalse = document.createElement('input');
+        radioFalse.type = 'radio';
+        radioFalse.name = `statement-${statementCount}`;
+        radioFalse.value = 'false';
+
+        const labelTrue = document.createElement('label');
+        labelTrue.textContent = 'Đúng';
+        const labelFalse = document.createElement('label');
+        labelFalse.textContent = 'Sai';
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Xóa';
+        deleteBtn.type = 'button';
+        deleteBtn.onclick = () => {
+            if (container.getElementsByClassName('trueFalse-statement').length > 1) {
+                statementDiv.remove();
+            } else {
+                alert('Phải có ít nhất 1 phát biểu');
+            }
+        };
+
+        radioDiv.appendChild(radioTrue);
+        radioDiv.appendChild(labelTrue);
+        radioDiv.appendChild(radioFalse);
+        radioDiv.appendChild(labelFalse);
+
+        statementDiv.appendChild(statementText);
+        statementDiv.appendChild(radioDiv);
+        statementDiv.appendChild(deleteBtn);
+
+        container.appendChild(statementDiv);
+    } catch (error) {
+        console.error('Error in addNewTrueFalse:', error);
+    }
+}
+
+function addQuestion() {
+    try {
+        const questionText = document.getElementById('question-text').value;
+        if (!questionText.trim()) {
+            alert('Vui lòng nhập câu hỏi!');
+            return;
         }
 
-        function showQuestionForm() {
-            const questionType = document.getElementById('question-type').value;
-            const questionForm = document.getElementById('question-form');
-            const optionsContainer = document.getElementById('options-container');
+        const question = {
+            type: currentQuestionType,
+            text: questionText,
+            options: [],
+            correctAnswers: []
+        };
 
-            if (!questionType) {
-                questionForm.style.display = 'none';
-                return;
-            }
+        if (currentQuestionType === 'single' || currentQuestionType === 'multiple') {
+            const optionInputs = document.querySelectorAll('#options-wrapper .option-input');
+            let hasCorrectAnswer = false;
 
-            currentQuestionType = questionType;
-            questionForm.style.display = 'block';
-            optionsContainer.innerHTML = '';
+            for (let i = 0; i < optionInputs.length; i++) {
+                const optionDiv = optionInputs[i];
+                const optionText = optionDiv.querySelector('input[type="text"]').value;
+                const isCorrect = optionDiv.querySelector('input[type="radio"], input[type="checkbox"]').checked;
 
-            if (questionType === 'single' || questionType === 'multiple') {
-                for (let i = 0; i < 4; i++) {
-                    const optionDiv = document.createElement('div');
-                    optionDiv.className = 'option-input';
-
-                    const input = document.createElement('input');
-                    input.type = questionType === 'single' ? 'radio' : 'checkbox';
-                    input.name = 'correct-answer';
-                    input.value = i;
-
-                    const optionText = document.createElement('input');
-                    optionText.type = 'text';
-                    optionText.placeholder = `Đáp án ${i + 1}`;
-
-                    optionDiv.appendChild(input);
-                    optionDiv.appendChild(optionText);
-                    optionsContainer.appendChild(optionDiv);
+                if (!optionText.trim()) {
+                    alert('Vui lòng nhập đầy đủ các đáp án!');
+                    return;
                 }
-            } else if (questionType === 'fill') {
-                const helpText = document.createElement('p');
-                helpText.textContent = 'Nhập câu văn và đặt dấu [...] tại vị trí cần điền.';
-                optionsContainer.appendChild(helpText);
 
-                const answerInput = document.createElement('input');
-                answerInput.type = 'text';
-                answerInput.className = 'answer-input';
-                answerInput.placeholder = 'Nhập đáp án cho phần điền khuyết...';
-                optionsContainer.appendChild(answerInput);
+                question.options.push(optionText);
+                if (isCorrect) {
+                    hasCorrectAnswer = true;
+                    question.correctAnswers.push(i);
+                }
             }
-        }
 
-        function addQuestion() {
-            const questionText = document.getElementById('question-text').value;
-            if (!questionText.trim()) {
-                alert('Vui lòng nhập câu hỏi!');
+            if (!hasCorrectAnswer) {
+                alert('Vui lòng chọn ít nhất một đáp án đúng!');
+                return;
+            }
+        } else if (currentQuestionType === 'trueFalse') {
+            const statements = document.querySelectorAll('.trueFalse-statement');
+            
+            for (let i = 0; i < statements.length; i++) {
+                const statement = statements[i];
+                const statementText = statement.querySelector('.statement-text').value;
+                if (!statementText.trim()) {
+                    alert('Vui lòng nhập đầy đủ các phát biểu!');
+                    return;
+                }
+
+                const radioTrue = statement.querySelector(`input[name="statement-${i}"][value="true"]`);
+                const radioFalse = statement.querySelector(`input[name="statement-${i}"][value="false"]`);
+                
+                if (!radioTrue.checked && !radioFalse.checked) {
+                    alert('Vui lòng chọn Đúng/Sai cho tất cả các phát biểu!');
+                    return;
+                }
+
+                question.options.push(statementText);
+                question.correctAnswers.push(radioTrue.checked);
+            }
+        } else if (currentQuestionType === 'fill') {
+            if (!questionText.includes('[...]')) {
+                alert('Vui lòng đặt dấu [...] tại vị trí cần điền!');
                 return;
             }
 
-            const question = {
-                type: currentQuestionType,
-                text: questionText,
-                options: [],
-                correctAnswers: []
-            };
+            const answer = document.querySelector('.answer-input').value;
+            if (!answer.trim()) {
+                alert('Vui lòng nhập đáp án cho phần điền khuyết!');
+                return;
+            }
+            question.correctAnswers = [answer];
+        }
 
-            if (currentQuestionType === 'single' || currentQuestionType === 'multiple') {
-                const optionInputs = document.querySelectorAll('.option-input');
-                let hasCorrectAnswer = false;
+        questions.push(question);
+        displayQuestions();
+        resetForm();
+    } catch (error) {
+        console.error('Error in addQuestion:', error);
+        alert('Đã xảy ra lỗi khi thêm câu hỏi');
+    }
+}
 
-                optionInputs.forEach((optionDiv, index) => {
-                    const optionText = optionDiv.querySelector('input[type="text"]').value;
-                    const isCorrect = optionDiv.querySelector('input[type="radio"], input[type="checkbox"]').checked;
+function displayQuestions() {
+    try {
+        const questionsList = document.getElementById('questions-list');
+        questionsList.innerHTML = '';
 
-                    if (!optionText.trim()) {
-                        alert('Vui lòng nhập đầy đủ các đáp án!');
-                        return;
-                    }
+        questions.forEach((question, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-container';
 
-                    question.options.push(optionText);
-                    if (isCorrect) {
-                        hasCorrectAnswer = true;
-                        question.correctAnswers.push(index);
-                    }
+            let questionContent = `<h3>Câu ${index + 1}</h3>
+                                <p>${question.text}</p>`;
+
+            if (question.type === 'trueFalse') {
+                questionContent += '<ul>';
+                question.options.forEach((statement, i) => {
+                    const answer = question.correctAnswers[i] ? 'Đúng' : 'Sai';
+                    questionContent += `
+                        <li>
+                            ${statement} (${answer})
+                        </li>`;
                 });
-
-                if (!hasCorrectAnswer) {
-                    alert('Vui lòng chọn ít nhất một đáp án đúng!');
-                    return;
-                }
-            } else if (currentQuestionType === 'fill') {
-                if (!questionText.includes('_____')) {
-                    alert('Vui lòng đặt dấu [...] tại vị trí cần điền!');
-                    return;
-                }
-
-                const answer = document.querySelector('.answer-input').value;
-                if (!answer.trim()) {
-                    alert('Vui lòng nhập đáp án cho phần điền khuyết!');
-                    return;
-                }
-                question.correctAnswers = [answer];
+                questionContent += '</ul>';
+            } else if (question.type === 'fill') {
+                questionContent += `<p>Đáp án: ${question.correctAnswers[0]}</p>`;
+            } else {
+                questionContent += '<ul>';
+                question.options.forEach((option, optIndex) => {
+                    const isCorrect = question.correctAnswers.includes(optIndex);
+                    questionContent += `
+                        <li style="color: ${isCorrect ? 'green' : 'black'}">
+                            ${option} ${isCorrect ? '✓' : ''}
+                        </li>`;
+                });
+                questionContent += '</ul>';
             }
 
-            questions.push(question);
-            displayQuestions();
-            resetForm();
-        }
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Xóa';
+            deleteButton.className = 'delete-btn';
+            deleteButton.onclick = () => deleteQuestion(index);
 
-        function displayQuestions() {
-            const questionsList = document.getElementById('questions-list');
-            questionsList.innerHTML = '';
+            questionDiv.innerHTML = questionContent;
+            questionDiv.appendChild(deleteButton);
+            questionsList.appendChild(questionDiv);
+        });
+    } catch (error) {
+        console.error('Error in displayQuestions:', error);
+    }
+}
 
-            questions.forEach((question, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'question-container';
-
-                let questionContent = `<h3>Câu ${index + 1}</h3>
-                                     <p>${question.text}</p>`;
-
-                if (question.type === 'fill') {
-                    questionContent += `<p>Đáp án: ${question.correctAnswers[0]}</p>`;
-                } else {
-                    questionContent += '<ul>';
-                    question.options.forEach((option, optIndex) => {
-                        const isCorrect = question.correctAnswers.includes(optIndex);
-                        questionContent += `
-                            <li style="color: ${isCorrect ? 'green' : 'black'}">
-                                ${option} ${isCorrect ? '✓' : ''}
-                            </li>`;
-                    });
-                    questionContent += '</ul>';
-                }
-
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Xóa';
-                deleteButton.className = 'delete-btn';
-                deleteButton.onclick = () => deleteQuestion(index);
-
-                questionDiv.innerHTML = questionContent;
-                questionDiv.appendChild(deleteButton);
-                questionsList.appendChild(questionDiv);
-            });
-        }
-
-        function deleteQuestion(index) {
+function deleteQuestion(index) {
+    try {
+        if (confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')) {
             questions.splice(index, 1);
             displayQuestions();
         }
+    } catch (error) {
+        console.error('Error in deleteQuestion:', error);
+    }
+}
 
-        function resetForm() {
-            document.getElementById('question-type').value = '';
-            document.getElementById('question-text').value = '';
-            document.getElementById('question-form').style.display = 'none';
+function resetForm() {
+    try {
+        document.getElementById('question-type').value = '';
+        document.getElementById('question-text').value = '';
+        document.getElementById('question-form').style.display = 'none';
+    } catch (error) {
+        console.error('Error in resetForm:', error);
+    }
+}
+
+async function saveExam() {
+    try {
+        const examTitle = document.getElementById('exam-title').value;
+        const examTime = document.getElementById('exam-time').value;
+        const readingText = document.getElementById('reading-text').value;
+
+        if (!examTitle.trim()) {
+            alert('Vui lòng nhập tiêu đề đề thi!');
+            return;
+        }
+        if (!examTime || examTime <= 0) {
+            alert('Vui lòng nhập thời gian làm bài hợp lệ!');
+            return;
+        }
+        if (!readingText.trim()) {
+            alert('Vui lòng nhập bài đọc!');
+            return;
+        }
+        if (questions.length === 0) {
+            alert('Vui lòng thêm ít nhất một câu hỏi!');
+            return;
         }
 
-        async function saveExam() {
-            const examTitle = document.getElementById('exam-title').value;
-            const examTime = document.getElementById('exam-time').value;
-            const readingText = document.getElementById('reading-text').value;
+        const exam = {
+            title: examTitle,
+            time: examTime,
+            reading: readingText,
+            questions: questions,
+            createdAt: new Date().toISOString()
+        };
 
-            if (!examTitle.trim()) {
-                alert('Vui lòng nhập tiêu đề đề thi!');
-                return;
-            }
-            if (!examTime || examTime <= 0) {
-                alert('Vui lòng nhập thời gian làm bài hợp lệ!');
-                return;
-            }
-            if (!readingText.trim()) {
-                alert('Vui lòng nhập bài đọc!');
-                return;
-            }
-            if (questions.length === 0) {
-                alert('Vui lòng thêm ít nhất một câu hỏi!');
-                return;
-            }
+        if (currentExamId) {
+            await database.ref(`exams/${currentExamId}`).update(exam);
+            alert('Đã cập nhật đề thi thành công!');
+        } else {
+            const newExamRef = database.ref('exams').push();
+            await newExamRef.set(exam);
+            alert('Đã lưu đề thi thành công!');
+        }
+        
+        resetAllForms();
+        showTab('list');
+    } catch (error) {
+        console.error('Error in saveExam:', error);
+        alert('Đã xảy ra lỗi khi lưu đề thi');
+    }
+}
 
-            const exam = {
-                title: examTitle,
-                time: examTime,
-                reading: readingText,
-                questions: questions,
-                createdAt: new Date().toISOString()
-            };
+function resetAllForms() {
+    try {
+        document.getElementById('exam-title').value = '';
+        document.getElementById('exam-time').value = '';
+        document.getElementById('reading-text').value = '';
+        questions = [];
+        currentExamId = null;
+        resetForm();
+        displayQuestions();
+    } catch (error) {
+        console.error('Error in resetAllForms:', error);
+    }
+}
 
-            try {
-                if (currentExamId) {
-                    // Cập nhật đề thi hiện có
-                    await database.ref(`exams/${currentExamId}`).update(exam);
-                    alert('Đã cập nhật đề thi thành công!');
-                } else {
-                    // Tạo đề thi mới
-                    const newExamRef = database.ref('exams').push();
-                    await newExamRef.set(exam);
-                    alert('Đã lưu đề thi thành công!');
-                }
-                resetAllForms();
-                showTab('list');
-            } catch (error) {
-                alert('Lỗi khi lưu đề thi: ' + error.message);
-            }
+function loadExams() {
+    try {
+        const examsRef = database.ref('exams');
+        examsRef.on('value', (snapshot) => {
+            const examsData = snapshot.val();
+            displayExamsList(examsData);
+        });
+    } catch (error) {
+        console.error('Error in loadExams:', error);
+        alert('Đã xảy ra lỗi khi tải danh sách đề thi');
+    }
+}
+
+function displayExamsList(examsData) {
+    try {
+        const examsList = document.getElementById('exams-list');
+        examsList.innerHTML = '';
+
+        if (!examsData) {
+            examsList.innerHTML = '<p>Chưa có đề thi nào.</p>';
+            return;
         }
 
-        function resetAllForms() {
-            document.getElementById('exam-title').value = '';
-            document.getElementById('exam-time').value = '';
-            document.getElementById('reading-text').value = '';
-            questions = [];
-            currentExamId = null;
-            resetForm();
-            displayQuestions();
-        }
-
-        function loadExams() {
-            const examsRef = database.ref('exams');
-            examsRef.on('value', (snapshot) => {
-                const examsData = snapshot.val();
-                displayExamsList(examsData);
-            });
-        }
-
-        function displayExamsList(examsData) {
-            const examsList = document.getElementById('exams-list');
-            examsList.innerHTML = '';
-
-            if (!examsData) {
-                examsList.innerHTML = '<p>Chưa có đề thi nào.</p>';
-                return;
-            }
-
-            Object.keys(examsData).forEach(key => {
-                const exam = examsData[key];
-                const examElement = document.createElement('div');
-                examElement.className = 'exam-item';
-                examElement.innerHTML = `
-                    <h3>${exam.title}</h3>
-                    <p>Thời gian: ${exam.time} phút</p>
-                    <p>Số câu hỏi: ${exam.questions.length}</p>
-                    <div class="exam-actions">
-                        <button onclick="viewExam('${key}')">Xem</button>
-                        <button onclick="editExam('${key}')">Sửa</button>
-                        <button class="delete-btn" onclick="deleteExam('${key}')">Xóa</button>
-                    </div>
-                `;
-                examsList.appendChild(examElement);
-            });
-        }
-
-        async function viewExam(examId) {
-            const examRef = database.ref(`exams/${examId}`);
-            const snapshot = await examRef.once('value');
-            const exam = snapshot.val();
-
-            const modal = document.getElementById('view-modal');
-            const examDetail = document.getElementById('exam-detail');
-
-            examDetail.innerHTML = `
-                <h2>${exam.title}</h2>
-                <p><strong>Thời gian:</strong> ${exam.time} phút</p>
-                <h3>Bài đọc:</h3>
-                <div class="reading-text">${exam.reading}</div>
-                <h3>Câu hỏi:</h3>
-                ${exam.questions.map((q, i) => `
-                    <div class="question-container">
-                        <h4>Câu ${i + 1}</h4>
-                        <p>${q.text}</p>
-                        ${q.type === 'fill'
-                    ? `<p><strong>Đáp án:</strong> ${q.correctAnswers[0]}</p>`
-                    : `<ul>${q.options.map((opt, index) => `
-                                <li style="color: ${q.correctAnswers.includes(index) ? 'green' : 'black'}">
-                                    ${opt} ${q.correctAnswers.includes(index) ? '✓' : ''}
-                                </li>`).join('')}
-                                </ul>`}
-                    </div>
-                `).join('')}
+        Object.keys(examsData).forEach(key => {
+            const exam = examsData[key];
+            const examElement = document.createElement('div');
+            examElement.className = 'exam-item';
+            examElement.innerHTML = `
+                <h3>${exam.title}</h3>
+                <p>Thời gian: ${exam.time} phút</p>
+                <p>Số câu hỏi: ${exam.questions.length}</p>
+                <p>Ngày tạo: ${new Date(exam.createdAt).toLocaleDateString()}</p>
+                <div class="exam-actions">
+                    <button onclick="viewExam('${key}')">Xem</button>
+                    <button onclick="editExam('${key}')">Sửa</button>
+                    <button class="delete-btn" onclick="deleteExam('${key}')">Xóa</button>
+                </div>
             `;
+            examsList.appendChild(examElement);
+        });
+    } catch (error) {
+        console.error('Error in displayExamsList:', error);
+    }
+}
 
-            modal.style.display = 'block';
-        }
+async function viewExam(examId) {
+    try {
+        const examRef = database.ref(`exams/${examId}`);
+        const snapshot = await examRef.once('value');
+        const exam = snapshot.val();
 
-        async function editExam(examId) {
-            const examRef = database.ref(`exams/${examId}`);
-            const snapshot = await examRef.once('value');
-            const exam = snapshot.val();
+        const modal = document.getElementById('view-modal');
+        const examDetail = document.getElementById('exam-detail');
 
-            document.getElementById('exam-title').value = exam.title;
-            document.getElementById('exam-time').value = exam.time;
-            document.getElementById('reading-text').value = exam.reading;
-
-            questions = exam.questions;
-            currentExamId = examId;
-
-            displayQuestions();
-            showTab('create');
-        }
-
-        async function deleteExam(examId) {
-            if (confirm('Bạn có chắc chắn muốn xóa đề thi này?')) {
-                try {
-                    await database.ref(`exams/${examId}`).remove();
-                    alert('Đã xóa đề thi thành công!');
-                } catch (error) {
-                    alert('Lỗi khi xóa đề thi: ' + error.message);
-                }
+        let questionsHtml = exam.questions.map((q, i) => {
+            let optionsHtml = '';
+            
+            if (q.type === 'trueFalse') {
+                optionsHtml = q.options.map((statement, j) => `
+                    <li>${statement} (${q.correctAnswers[j] ? 'Đúng' : 'Sai'})</li>
+                `).join('');
+            } else if (q.type === 'fill') {
+                optionsHtml = `<p><strong>Đáp án:</strong> ${q.correctAnswers[0]}</p>`;
+            } else {
+                optionsHtml = q.options.map((opt, j) => `
+                    <li style="color: ${q.correctAnswers.includes(j) ? 'green' : 'black'}">
+                        ${opt} ${q.correctAnswers.includes(j) ? '✓' : ''}
+                    </li>
+                `).join('');
             }
-        }
 
-        function closeModal() {
-            document.getElementById('view-modal').style.display = 'none';
-        }
+            return `
+                <div class="question-container">
+                    <h4>Câu ${i + 1}</h4>
+                    <p>${q.text}</p>
+                    ${q.type === 'fill' ? optionsHtml : `<ul>${optionsHtml}</ul>`}
+                </div>
+            `;
+        }).join('');
 
-        // Đóng modal khi click ngoài modal
-        window.onclick = function (event) {
-            const modal = document.getElementById('view-modal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        }
+        examDetail.innerHTML = `
+            <h2>${exam.title}</h2>
+            <p><strong>Thời gian:</strong> ${exam.time} phút</p>
+            <p><strong>Ngày tạo:</strong> ${new Date(exam.createdAt).toLocaleDateString()}</p>
+            <h3>Bài đọc:</h3>
+            <div class="reading-text">${exam.reading}</div>
+            <h3>Câu hỏi:</h3>
+            ${questionsHtml}
+        `;
 
-        // Load danh sách đề thi khi trang được tải
+        modal.style.display = 'block';
+    } catch (error) {
+        console.error('Error in viewExam:', error);
+        alert('Đã xảy ra lỗi khi xem đề thi');
+    }
+}
+
+async function editExam(examId) {
+    try {
+        const examRef = database.ref(`exams/${examId}`);
+        const snapshot = await examRef.once('value');
+        const exam = snapshot.val();
+
+        document.getElementById('exam-title').value = exam.title;
+        document.getElementById('exam-time').value = exam.time;
+        document.getElementById('reading-text').value = exam.reading;
+
+        questions = exam.questions;
+        currentExamId = examId;
+
+        displayQuestions();
+        showTab('create');
+    } catch (error) {
+        console.error('Error in editExam:', error);
+        alert('Đã xảy ra lỗi khi sửa đề thi');
+    }
+}
+
+async function deleteExam(examId) {
+    try {
+        if (confirm('Bạn có chắc chắn muốn xóa đề thi này?')) {
+            await database.ref(`exams/${examId}`).remove();
+            alert('Đã xóa đề thi thành công!');
+        }
+    } catch (error) {
+        console.error('Error in deleteExam:', error);
+        alert('Đã xảy ra lỗi khi xóa đề thi');
+    }
+}
+
+function closeModal() {
+    try {
+        document.getElementById('view-modal').style.display = 'none';
+    } catch (error) {
+        console.error('Error in closeModal:', error);
+    }
+}
+
+// Đóng modal khi click ngoài modal
+window.onclick = function(event) {
+    try {
+        const modal = document.getElementById('view-modal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error in window.onclick:', error);
+    }
+}
+
+// Load danh sách đề thi khi trang được tải
+document.addEventListener('DOMContentLoaded', function() {
+    try {
         loadExams();
+    } catch (error) {
+        console.error('Error in DOMContentLoaded:', error);
+    }
+});
     </script>
 </body>
 
