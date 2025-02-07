@@ -256,6 +256,103 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        .drag-drop-container {
+            margin: 15px 0;
+        }
+
+        .keywords-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+            min-height: 50px;
+            padding: 10px;
+            border: 1px dashed #ccc;
+        }
+
+        .keyword {
+            padding: 5px 10px;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            cursor: move;
+            user-select: none;
+        }
+
+        .blank-space {
+            display: inline-block;
+            width: 120px;
+            height: 30px;
+            border: 2px dashed #ccc;
+            margin: 0 5px;
+            vertical-align: middle;
+        }
+
+        .blank-space.hover {
+            background-color: #f8f9fa;
+            border-style: solid;
+        }
+
+        .keyword-input-container {
+            margin: 10px 0;
+        }
+
+        .keyword-input {
+            width: calc(100% - 100px);
+            padding: 8px;
+            margin-right: 10px;
+        }
+
+        .keywords-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+            min-height: 50px;
+            padding: 10px;
+            border: 1px dashed #ccc;
+        }
+
+        #correct-keywords-container {
+            background-color: #e8f5e9;
+        }
+
+        #distractor-keywords-container {
+            background-color: #fce4ec;
+        }
+
+        .keyword {
+            padding: 5px 10px;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            cursor: move;
+            user-select: none;
+        }
+
+        .fill-answer-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .fill-answer-item label {
+            min-width: 80px;
+        }
+
+        .fill-answer-item .answer-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .fill-answer-item .delete-btn {
+            padding: 5px 10px;
+            margin-left: 10px;
+        }
     </style>
 </head>
 
@@ -294,6 +391,7 @@
                     <option value="multiple">Trắc nghiệm nhiều đáp án</option>
                     <option value="fill">Điền khuyết</option>
                     <option value="trueFalse">Đúng/Sai</option>
+                    <option value="drag-drop">Kéo thả</option>
                 </select>
 
                 <div id="question-form" style="display: none;">
@@ -340,7 +438,7 @@
         let currentQuestionType = '';
         let currentExamId = null;
 
-        // Xử lý tabs
+        // Xử lý tabs 
         function showTab(tabName) {
             try {
                 document.querySelectorAll('.tab-button').forEach(btn => {
@@ -377,7 +475,6 @@
                 optionsContainer.innerHTML = '';
 
                 if (questionType === 'single' || questionType === 'multiple') {
-                    // Thêm nút để tạo thêm đáp án
                     const addOptionBtn = document.createElement('button');
                     addOptionBtn.textContent = 'Thêm đáp án';
                     addOptionBtn.type = 'button';
@@ -388,16 +485,13 @@
                     optionsContainer.appendChild(optionsWrapper);
                     optionsContainer.appendChild(addOptionBtn);
 
-                    // Tạo 4 đáp án mặc định
                     for (let i = 0; i < 4; i++) {
                         addNewOption();
                     }
                 } else if (questionType === 'trueFalse') {
-                    // Thêm container cho các câu đúng/sai
                     const trueFalseContainer = document.createElement('div');
                     trueFalseContainer.id = 'trueFalse-container';
 
-                    // Thêm nút để tạo thêm câu đúng/sai
                     const addTrueFalseBtn = document.createElement('button');
                     addTrueFalseBtn.textContent = 'Thêm câu đúng/sai';
                     addTrueFalseBtn.type = 'button';
@@ -406,25 +500,85 @@
                     optionsContainer.appendChild(trueFalseContainer);
                     optionsContainer.appendChild(addTrueFalseBtn);
 
-                    // Tạo 1 câu đúng/sai mặc định
                     addNewTrueFalse();
                 } else if (questionType === 'fill') {
                     const helpText = document.createElement('p');
-                    helpText.textContent = 'Nhập câu văn và đặt dấu [______] tại vị trí cần điền.';
+                    helpText.textContent = 'Nhập câu văn và đặt dấu [______] tại các vị trí cần điền.';
                     optionsContainer.appendChild(helpText);
 
-                    const answerInput = document.createElement('input');
-                    answerInput.type = 'text';
-                    answerInput.className = 'answer-input';
-                    answerInput.placeholder = 'Nhập đáp án cho phần điền khuyết...';
-                    optionsContainer.appendChild(answerInput);
+                    const answersContainer = document.createElement('div');
+                    answersContainer.id = 'fill-answers-container';
+
+                    const addAnswerBtn = document.createElement('button');
+                    addAnswerBtn.textContent = 'Thêm đáp án';
+                    addAnswerBtn.onclick = addFillAnswer;
+
+                    optionsContainer.appendChild(answersContainer);
+                    optionsContainer.appendChild(addAnswerBtn);
+
+                    // Thêm đáp án đầu tiên
+                    addFillAnswer();
+
+                } else if (questionType === 'drag-drop') {
+                    const dragDropContainer = document.createElement('div');
+                    dragDropContainer.className = 'drag-drop-container';
+
+                    const helpText = document.createElement('p');
+                    helpText.textContent = 'Nhập câu văn và đặt dấu [______] tại vị trí cần điền.';
+
+                    // Container cho từ khóa đúng
+                    const correctKeywordsContainer = document.createElement('div');
+                    correctKeywordsContainer.className = 'keywords-container';
+                    correctKeywordsContainer.id = 'correct-keywords-container';
+                    const correctLabel = document.createElement('p');
+                    correctLabel.textContent = 'Từ khóa đúng:';
+
+                    // Container cho từ khóa nhiễu
+                    const distractorKeywordsContainer = document.createElement('div');
+                    distractorKeywordsContainer.className = 'keywords-container';
+                    distractorKeywordsContainer.id = 'distractor-keywords-container';
+                    const distractorLabel = document.createElement('p');
+                    distractorLabel.textContent = 'Từ khóa nhiễu:';
+
+                    const keywordInputContainer = document.createElement('div');
+                    keywordInputContainer.className = 'keyword-input-container';
+
+                    const keywordInput = document.createElement('input');
+                    keywordInput.type = 'text';
+                    keywordInput.className = 'keyword-input';
+                    keywordInput.placeholder = 'Nhập từ khóa...';
+
+                    const addCorrectBtn = document.createElement('button');
+                    addCorrectBtn.textContent = 'Thêm từ khóa đúng';
+                    addCorrectBtn.onclick = () => addKeyword(keywordInput.value, true);
+
+                    const addDistractorBtn = document.createElement('button');
+                    addDistractorBtn.textContent = 'Thêm từ khóa nhiễu';
+                    addDistractorBtn.onclick = () => addKeyword(keywordInput.value, false);
+
+                    keywordInputContainer.appendChild(keywordInput);
+                    keywordInputContainer.appendChild(addCorrectBtn);
+                    keywordInputContainer.appendChild(addDistractorBtn);
+
+                    dragDropContainer.appendChild(helpText);
+                    dragDropContainer.appendChild(correctLabel);
+                    dragDropContainer.appendChild(correctKeywordsContainer);
+                    dragDropContainer.appendChild(distractorLabel);
+                    dragDropContainer.appendChild(distractorKeywordsContainer);
+                    dragDropContainer.appendChild(keywordInputContainer);
+
+                    optionsContainer.appendChild(dragDropContainer);
+
+                    correctKeywordsContainer.addEventListener('dragover', handleDragOver);
+                    correctKeywordsContainer.addEventListener('drop', handleDrop);
+                    distractorKeywordsContainer.addEventListener('dragover', handleDragOver);
+                    distractorKeywordsContainer.addEventListener('drop', handleDrop);
                 }
             } catch (error) {
                 console.error('Error in showQuestionForm:', error);
                 alert('Đã xảy ra lỗi khi hiển thị form câu hỏi');
             }
         }
-
         function addNewOption() {
             try {
                 const optionsWrapper = document.getElementById('options-wrapper');
@@ -461,6 +615,43 @@
             } catch (error) {
                 console.error('Error in addNewOption:', error);
             }
+        }
+
+        function addFillAnswer() {
+            const container = document.getElementById('fill-answers-container');
+            const answerIndex = container.children.length + 1;
+
+            const answerDiv = document.createElement('div');
+            answerDiv.className = 'fill-answer-item';
+
+            const label = document.createElement('label');
+            label.textContent = `Đáp án ${answerIndex}:`;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'answer-input';
+            input.placeholder = `Nhập đáp án cho chỗ trống thứ ${answerIndex}...`;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Xóa';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.onclick = () => {
+                if (container.children.length > 1) {
+                    answerDiv.remove();
+                    // Cập nhật lại số thứ tự của các đáp án
+                    Array.from(container.children).forEach((item, idx) => {
+                        item.querySelector('label').textContent = `Đáp án ${idx + 1}:`;
+                        item.querySelector('input').placeholder = `Nhập đáp án cho chỗ trống thứ ${idx + 1}...`;
+                    });
+                } else {
+                    alert('Phải có ít nhất một đáp án!');
+                }
+            };
+
+            answerDiv.appendChild(label);
+            answerDiv.appendChild(input);
+            answerDiv.appendChild(deleteBtn);
+            container.appendChild(answerDiv);
         }
 
         function addNewTrueFalse() {
@@ -520,6 +711,67 @@
             }
         }
 
+        function addKeyword(keywordText, isCorrect) {
+            const keyword = keywordText.trim();
+            if (!keyword) {
+                alert('Vui lòng nhập từ khóa!');
+                return;
+            }
+
+            const container = document.getElementById(
+                isCorrect ? 'correct-keywords-container' : 'distractor-keywords-container'
+            );
+
+            const keywordElement = document.createElement('div');
+            keywordElement.className = 'keyword';
+            keywordElement.textContent = keyword;
+            keywordElement.draggable = true;
+            keywordElement.dataset.isCorrect = isCorrect;
+
+            keywordElement.addEventListener('dragstart', handleDragStart);
+            keywordElement.addEventListener('dragend', handleDragEnd);
+
+            container.appendChild(keywordElement);
+            document.querySelector('.keyword-input').value = '';
+        }
+
+        function handleDragStart(e) {
+            try {
+                e.target.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', e.target.textContent);
+            } catch (error) {
+                console.error('Error in handleDragStart:', error);
+            }
+        }
+
+        function handleDragEnd(e) {
+            try {
+                e.target.classList.remove('dragging');
+            } catch (error) {
+                console.error('Error in handleDragEnd:', error);
+            }
+        }
+
+        function handleDragOver(e) {
+            try {
+                e.preventDefault();
+            } catch (error) {
+                console.error('Error in handleDragOver:', error);
+            }
+        }
+
+        function handleDrop(e) {
+            try {
+                e.preventDefault();
+                const container = document.getElementById('keywords-container');
+                const draggingElement = document.querySelector('.dragging');
+                if (draggingElement && e.target === container) {
+                    container.appendChild(draggingElement);
+                }
+            } catch (error) {
+                console.error('Error in handleDrop:', error);
+            }
+        }
         function addQuestion() {
             try {
                 const questionText = document.getElementById('question-text').value;
@@ -583,17 +835,69 @@
                         question.correctAnswers.push(radioTrue.checked);
                     }
                 } else if (currentQuestionType === 'fill') {
-                    if (!questionText.includes('[______]')) {
-                        alert('Vui lòng đặt dấu [______] tại vị trí cần điền!');
+                    const blankCount = (questionText.match(/\[______\]/g) || []).length;
+                    const answerInputs = document.querySelectorAll('#fill-answers-container .answer-input');
+                    const answers = Array.from(answerInputs).map(input => input.value.trim());
+
+                    if (blankCount === 0) {
+                        alert('Vui lòng đặt ít nhất một dấu [______] trong câu hỏi!');
                         return;
                     }
 
-                    const answer = document.querySelector('.answer-input').value;
-                    if (!answer.trim()) {
-                        alert('Vui lòng nhập đáp án cho phần điền khuyết!');
+                    if (blankCount !== answers.length) {
+                        alert(`Số lượng chỗ trống (${blankCount}) phải bằng số lượng đáp án (${answers.length})!`);
                         return;
                     }
-                    question.correctAnswers = [answer];
+
+                    if (answers.some(answer => !answer)) {
+                        alert('Vui lòng nhập đầy đủ các đáp án!');
+                        return;
+                    }
+
+                    question.correctAnswers = answers;
+
+                } else if (currentQuestionType === 'drag-drop') {
+                    // Get all keywords from both correct and distractor containers
+                    const correctKeywords = Array.from(
+                        document.getElementById('correct-keywords-container').querySelectorAll('.keyword')
+                    ).map(k => k.textContent);
+
+                    const distractorKeywords = Array.from(
+                        document.getElementById('distractor-keywords-container').querySelectorAll('.keyword')
+                    ).map(k => k.textContent);
+
+                    // Count blanks in question text
+                    const blanks = (questionText.match(/\[______\]/g) || []).length;
+
+                    if (blanks === 0) {
+                        alert('Vui lòng thêm ít nhất một vị trí cần điền bằng cách sử dụng [______]');
+                        return;
+                    }
+
+                    if (correctKeywords.length < blanks) {
+                        alert('Số từ khóa đúng phải bằng số vị trí cần điền');
+                        return;
+                    }
+
+                    // Find positions of blanks in question text
+                    const blankPositions = [];
+                    let pos = -1;
+                    const regex = /\[______\]/g;
+                    while ((match = regex.exec(questionText)) !== null) {
+                        blankPositions.push(match.index);
+                    }
+
+                    // Combine all keywords for options
+                    const allKeywords = [...correctKeywords, ...distractorKeywords];
+
+                    if (allKeywords.length === 0) {
+                        alert('Vui lòng thêm ít nhất một từ khóa');
+                        return;
+                    }
+
+                    question.options = allKeywords; // All available keywords
+                    question.correctAnswers = correctKeywords; // Only correct keywords
+                    question.blankPositions = blankPositions; // Store positions of blanks
                 }
 
                 questions.push(question);
@@ -615,28 +919,38 @@
                     questionDiv.className = 'question-container';
 
                     let questionContent = `<h3>Câu ${index + 1}</h3>
-                                <p>${question.text}</p>`;
+                            <p>${question.text}</p>`;
 
-                    if (question.type === 'trueFalse') {
+                    if (question.type === 'drag-drop') {
+                        questionContent += `
+                    <div class="keywords-list">
+                        <h4>Từ khóa:</h4>
+                        <p>${question.options.join(', ')}</p>
+                    </div>
+                `;
+                    } else if (question.type === 'trueFalse') {
                         questionContent += '<ul>';
                         question.options.forEach((statement, i) => {
                             const answer = question.correctAnswers[i] ? 'Đúng' : 'Sai';
                             questionContent += `
-                        <li>
-                            ${statement} (${answer})
-                        </li>`;
+                    <li>${statement} (${answer})</li>`;
                         });
                         questionContent += '</ul>';
                     } else if (question.type === 'fill') {
-                        questionContent += `<p>Đáp án: ${question.correctAnswers[0]}</p>`;
+                        questionContent += '<div class="answers-list">';
+                        question.correctAnswers.forEach((answer, index) => {
+                            questionContent += `<p>Đáp án ${index + 1}: ${answer}</p>`;
+                        });
+                        questionContent += '</div>';
+
                     } else {
                         questionContent += '<ul>';
                         question.options.forEach((option, optIndex) => {
                             const isCorrect = question.correctAnswers.includes(optIndex);
                             questionContent += `
-                        <li style="color: ${isCorrect ? 'green' : 'black'}">
-                            ${option} ${isCorrect ? '✓' : ''}
-                        </li>`;
+                    <li style="color: ${isCorrect ? 'green' : 'black'}">
+                        ${option} ${isCorrect ? '✓' : ''}
+                    </li>`;
                         });
                         questionContent += '</ul>';
                     }
@@ -795,12 +1109,24 @@
                 let questionsHtml = exam.questions.map((q, i) => {
                     let optionsHtml = '';
 
-                    if (q.type === 'trueFalse') {
+                    if (q.type === 'drag-drop') {
+                        optionsHtml = `
+                    <div class="keywords-list">
+                        <h4>Từ khóa:</h4>
+                        <p>${q.options.join(', ')}</p>
+                    </div>
+                `;
+                    } else if (q.type === 'trueFalse') {
                         optionsHtml = q.options.map((statement, j) => `
                     <li>${statement} (${q.correctAnswers[j] ? 'Đúng' : 'Sai'})</li>
                 `).join('');
                     } else if (q.type === 'fill') {
-                        optionsHtml = `<p><strong>Đáp án:</strong> ${q.correctAnswers[0]}</p>`;
+                        optionsHtml = `<div class="answers-list">`;
+                        q.correctAnswers.forEach((answer, index) => {
+                            optionsHtml += `<p><strong>Đáp án ${index + 1}:</strong> ${answer}</p>`;
+                        });
+                        optionsHtml += '</div>';
+
                     } else {
                         optionsHtml = q.options.map((opt, j) => `
                     <li style="color: ${q.correctAnswers.includes(j) ? 'green' : 'black'}">
