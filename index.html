@@ -6,6 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống luyện đề chonghz</title>
 
+
+    <link rel="icon" type="image/png" href="avatar.png">
+
+    <meta property="og:title" content="Trang web luyện đề văn TSA">
+  <meta property="og:description" content="Valedictorian TSA">
+  <meta property="og:image" content="background.jpg">
+  <meta property="og:url" content="https://www.example.com">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tiêu đề trang web của bạn">
+  <meta name="twitter:description" content="Mô tả ngắn gọn về trang web của bạn">
+  <meta name="twitter:image" content="duong-dan/preview-image.jpg">
+</head>
+
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -863,6 +880,404 @@
         .answer-review p {
             margin: 8px 0;
         }
+
+        /* New question styles */
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .question-type {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            background: rgba(59, 130, 246, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .fill-container {
+            line-height: 1.8;
+            font-size: 16px;
+            padding: 1rem;
+            background: var(--background-color);
+            border-radius: 12px;
+        }
+
+        .fill-part {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .fill-inline-input {
+            width: 140px;
+            padding: 8px 12px;
+            margin: 0 5px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+        }
+
+        .drag-drop-content {
+            padding: 1rem;
+            background: var(--background-color);
+            border-radius: 12px;
+        }
+
+        .true-false-content {
+            padding: 1rem;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Improved drag-drop styles */
+        .drag-drop-container {
+            margin: 1.5rem 0;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .keywords-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            margin: 1rem 0;
+            min-height: 3.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .keyword {
+            padding: 0.5rem 1rem;
+            background: var(--white);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            cursor: grab;
+            user-select: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+        }
+
+        .keyword:active {
+            cursor: grabbing;
+            transform: scale(0.98);
+            box-shadow: var(--shadow);
+        }
+
+        .keyword.dragging {
+            opacity: 0.5;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .drop-zone {
+            min-width: auto;
+            min-height: 36px;
+            border: 2px dashed var(--primary-color);
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: 8px;
+            margin: 0.5rem 1rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            width: fit-content;
+        }
+
+        .drop-zone.hover {
+            background: rgba(37, 99, 235, 0.1);
+            border-style: solid;
+            transform: scale(1.02);
+        }
+
+        .drop-zone.filled {
+            border-style: solid;
+            background: var(--white);
+            padding: 0.25rem 0.5rem;
+        }
+
+        .keyword.placed {
+            background: var(--primary-color);
+            color: white;
+            border-color: transparent;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .keyword.placed:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* CẢI THIỆN CÁC DẠNG CÂU HỎI */
+        .question {
+            background: var(--white);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .question:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .question-type {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            background: rgba(59, 130, 246, 0.08);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        /* TRẮC NGHIỆM */
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            position: relative;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--white);
+            transition: all 0.2s ease;
+        }
+
+        .option:hover {
+            border-color: var(--primary-color);
+            background: rgba(59, 130, 246, 0.03);
+        }
+
+        .option label {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            gap: 0.75rem;
+        }
+
+        .option input[type="radio"],
+        .option input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            appearance: none;
+            transition: all 0.2s ease;
+        }
+
+        .option input[type="checkbox"] {
+            border-radius: 4px;
+        }
+
+        .option input:checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .option input:checked::after {
+            content: '';
+            display: block;
+            width: 60%;
+            height: 60%;
+            margin: 20%;
+            background: var(--white);
+            border-radius: 50%;
+        }
+
+        .option input[type="checkbox"]:checked::after {
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+
+        /* ĐIỀN KHUYẾT */
+        .fill-container {
+            line-height: 1.8;
+            padding: 1rem;
+            background: var(--background-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .fill-inline-input {
+            width: 140px;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            background: var(--white);
+        }
+
+        .fill-inline-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* ĐÚNG/SAI */
+        .true-false-statement {
+            padding: 1.25rem;
+            background: var(--white);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .true-false-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .true-false-options label {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .true-false-options label[data-correct="true"] {
+            border-color: rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .true-false-options label[data-correct="false"] {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .true-false-options input:checked+span {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* KÉO THẢ */
+        .drag-drop-container {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .keywords-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            min-height: 3.5rem;
+            background: var(--background-color);
+        }
+
+        .keyword {
+            padding: 0.5rem 1rem;
+            background: var(--white);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            cursor: grab;
+            user-select: none;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+            white-space: nowrap;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .keyword.dragging {
+            opacity: 0.7;
+            background: var(--primary-color);
+            color: var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .drop-zone {
+            min-width: 100px;
+            min-height: 40px;
+            border: 2px dashed var(--primary-color);
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 8px;
+            margin: 0 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone.hover {
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
+        }
+
+        .drop-zone.filled {
+            border-style: solid;
+            background: var(--white);
+            padding: 0.25rem 0.5rem;
+        }
+
+        /* HIỆU ỨNG */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .question {
+                margin-bottom: 1rem;
+                padding: 1rem;
+            }
+
+            .option label {
+                padding: 0.75rem;
+            }
+
+            .true-false-options {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 
@@ -1064,128 +1479,201 @@
                 const questionDiv = document.createElement('div');
                 questionDiv.className = 'question';
 
-                // Thêm phần hiển thị loại câu hỏi
-                let questionTypeText = '';
-                switch (question.type) {
-                    case 'single': questionTypeText = 'Trắc nghiệm một đáp án'; break;
-                    case 'multiple': questionTypeText = 'Trắc nghiệm nhiều đáp án'; break;
-                    case 'fill': questionTypeText = 'Điền khuyết'; break;
-                    case 'trueFalse': questionTypeText = 'Đúng/Sai'; break;
-                    case 'drag-drop': questionTypeText = 'Kéo thả'; break;
-                }
-
                 questionDiv.innerHTML = `
-            <div class="question-header">
-                <strong>Câu ${index + 1}</strong>
-                <span class="question-type">${questionTypeText}</span>
-            </div>
-            <div class="question-text">${question.text}</div>
-            ${getQuestionInput(question, index)}
-        `;
+                    <div class="question-header">
+                        <strong>Câu ${index + 1}</strong>
+                        <span class="question-type">${getQuestionTypeText(question.type)}</span>
+                    </div>
+                    ${getQuestionContent(question, index)}
+                `;
                 questionsContainer.appendChild(questionDiv);
             });
             initializeDragAndDrop();
         }
 
-        // Thêm vào sau phần displayExam()
-        function initializeDragAndDrop() {
-            let draggedElement = null;
+        function getQuestionTypeText(type) {
+            const typeMap = {
+                'single': 'Trắc nghiệm một đáp án',
+                'multiple': 'Trắc nghiệm nhiều đáp án',
+                'fill': 'Điền khuyết',
+                'trueFalse': 'Đúng/Sai',
+                'drag-drop': 'Kéo thả'
+            };
+            return typeMap[type] || '';
+        }
 
-            // Lấy tất cả các keyword và drop zone
-            const keywords = document.querySelectorAll('.keyword');
-            const dropZones = document.querySelectorAll('.drop-zone');
-            const keywordsContainer = document.querySelector('.keywords-container');
+        function getQuestionContent(question, index) {
+            switch (question.type) {
+                case 'fill':
+                    return `
+                        <div class="fill-container">
+                            ${formatFillQuestion(question.text, index)}
+                        </div>
+                    `;
 
-            // Thiết lập drag events cho từng keyword
-            keywords.forEach(keyword => {
-                keyword.addEventListener('dragstart', handleDragStart);
-                keyword.addEventListener('dragend', handleDragEnd);
-                // Cho phép click để trả về từ khóa
-                keyword.addEventListener('click', handleKeywordClick);
-            });
+                case 'trueFalse':
+                    return `
+                        <div class="true-false-content">
+                            ${formatTrueFalseQuestion(question, index)}
+                        </div>
+                    `;
 
-            // Thiết lập drop events cho từng drop zone
-            dropZones.forEach(dropZone => {
-                dropZone.addEventListener('dragover', handleDragOver);
-                dropZone.addEventListener('dragleave', handleDragLeave);
-                dropZone.addEventListener('drop', handleDrop);
-            });
+                case 'drag-drop':
+                    return `
+                        <div class="drag-drop-content">
+                            ${formatDragDropQuestion(question, index)}
+                        </div>
+                    `;
 
-            function handleDragStart(e) {
-                draggedElement = e.target;
-                e.target.classList.add('dragging');
-                e.dataTransfer.setData('text/plain', ''); // Cần thiết cho Firefox
-            }
-
-            function handleDragEnd(e) {
-                e.target.classList.remove('dragging');
-                draggedElement = null;
-                dropZones.forEach(zone => zone.classList.remove('hover'));
-            }
-
-            function handleDragOver(e) {
-                e.preventDefault();
-                if (!e.target.classList.contains('drop-zone')) return;
-                e.target.classList.add('hover');
-            }
-
-            function handleDragLeave(e) {
-                if (!e.target.classList.contains('drop-zone')) return;
-                e.target.classList.remove('hover');
-            }
-
-            function handleDrop(e) {
-                e.preventDefault();
-                const dropZone = e.target.closest('.drop-zone');
-                if (!dropZone || !draggedElement) return;
-
-                dropZone.classList.remove('hover');
-
-                // Nếu drop zone đã có từ khóa
-                if (dropZone.children.length > 0) {
-                    const existingKeyword = dropZone.children[0];
-                    returnKeywordToContainer(existingKeyword);
-                }
-
-                // Thêm từ khóa mới vào drop zone
-                const clone = draggedElement.cloneNode(true);
-                clone.classList.add('placed');
-                clone.addEventListener('click', () => handleKeywordClick(clone));
-
-                dropZone.innerHTML = '';
-                dropZone.appendChild(clone);
-
-                // Xóa từ khóa gốc khỏi container
-                if (draggedElement.parentNode === keywordsContainer) {
-                    draggedElement.remove();
-                }
-            }
-
-            function handleKeywordClick(element) {
-                if (element.classList.contains('placed')) {
-                    const originalKeyword = element.cloneNode(true);
-                    originalKeyword.classList.remove('placed');
-                    originalKeyword.addEventListener('dragstart', handleDragStart);
-                    originalKeyword.addEventListener('dragend', handleDragEnd);
-                    originalKeyword.addEventListener('click', () => handleKeywordClick(originalKeyword));
-
-                    keywordsContainer.appendChild(originalKeyword);
-                    element.remove();
-                }
-            }
-
-            function returnKeywordToContainer(keyword) {
-                const clone = keyword.cloneNode(true);
-                clone.classList.remove('placed');
-                clone.addEventListener('dragstart', handleDragStart);
-                clone.addEventListener('dragend', handleDragEnd);
-                clone.addEventListener('click', () => handleKeywordClick(clone));
-
-                keywordsContainer.appendChild(clone);
-                keyword.remove();
+                default:
+                    return `
+                        <div class="question-text">${question.text}</div>
+                        ${formatChoiceOptions(question, index)}
+                    `;
             }
         }
 
+        function formatFillQuestion(text, index) {
+            const parts = text.split(/\[______\]/g);
+            const blankCount = parts.length - 1;
+
+            return parts.map((part, i) => `
+                <span class="fill-part">${part}</span>
+                ${i < blankCount ? `
+                    <input type="text" 
+                        class="fill-inline-input" 
+                        data-question="${index}"
+                        data-blank="${i}"
+                        placeholder="Điền đáp án">
+                ` : ''}
+            `).join('');
+        }
+
+        function formatTrueFalseQuestion(question, index) {
+            return `
+                <div class="question-text">${question.text}</div>
+                <div class="${question.options.length > 1 ? 'true-false-column' : ''}">
+                    ${question.options.map((statement, stmtIndex) => `
+                        <div class="true-false-statement">
+                            <p class="statement-text">${statement}</p>
+                            <div class="true-false-options">
+                                ${['Đúng', 'Sai'].map((label, i) => `
+                                    <label>
+                                        <input type="radio" 
+                                            name="question${index}_${stmtIndex}" 
+                                            value="${i === 0}" 
+                                            data-question="${index}"
+                                            data-statement="${stmtIndex}">
+                                        <span>${label}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function formatDragDropQuestion(question, index) {
+            const shuffledKeywords = [...question.options].sort(() => Math.random() - 0.5);
+            const questionText = question.text.replace(/\[______\]/g, (_, i) =>
+                `<span class="drop-zone" data-question-id="${index}" data-drop-index="${i}"></span>`
+            );
+
+            return `
+                <div class="question-text">${questionText}</div>
+                <div class="keywords-container">
+                    ${shuffledKeywords.map((keyword, idx) => `
+                        <span class="keyword" draggable="true" data-index="${idx}">${keyword}</span>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function formatChoiceOptions(question, index) {
+            const inputType = question.type === 'single' ? 'radio' : 'checkbox';
+            return `
+                <div class="options">
+                    ${question.options.map((option, optIndex) => `
+                        <div class="option">
+                            <label>
+                                <input type="${inputType}" 
+                                    name="question${index}" 
+                                    value="${optIndex}" 
+                                    data-question="${index}">
+                                <span>${option}</span>
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Thêm vào sau phần displayExam()
+        // Thay thế hàm initializeDragAndDrop bằng phiên bản mới
+
+        function initializeDragAndDrop() {
+            let dragItem = null;
+
+            document.addEventListener('dragstart', e => {
+                if (e.target.classList.contains('keyword')) {
+                    dragItem = e.target;
+                    dragItem.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                }
+            });
+
+            document.addEventListener('dragend', e => {
+                if (dragItem) {
+                    dragItem.classList.remove('dragging');
+                    dragItem = null;
+                }
+            });
+
+            document.addEventListener('dragover', e => {
+                e.preventDefault();
+                const target = e.target.closest('.drop-zone, .keywords-container');
+                if (target) {
+                    e.dataTransfer.dropEffect = 'move';
+                    if (target.classList.contains('drop-zone')) {
+                        target.classList.add('hover');
+                    }
+                }
+            });
+
+            document.addEventListener('dragleave', e => {
+                const zone = e.target.closest('.drop-zone');
+                if (zone) zone.classList.remove('hover');
+            });
+
+            document.addEventListener('drop', e => {
+                e.preventDefault();
+                const zone = e.target.closest('.drop-zone');
+                const keywordsContainer = e.target.closest('.keywords-container');
+
+                // Xử lý thả vào vùng thả
+                if (zone) {
+                    zone.classList.remove('hover');
+
+                    // Trả từ khóa hiện có về container nếu có
+                    if (zone.children.length > 0) {
+                        const existing = zone.firstChild;
+                        const sourceContainer = document.querySelector('.keywords-container');
+                        existing.classList.remove('placed');
+                        sourceContainer.appendChild(existing);
+                    }
+
+                    // Thêm từ khóa mới vào vùng thả
+                    zone.appendChild(dragItem);
+                    dragItem.classList.add('placed');
+                }
+                // Xử lý thả về container gốc
+                else if (keywordsContainer) {
+                    dragItem.classList.remove('placed');
+                    keywordsContainer.appendChild(dragItem);
+                }
+            });
+        }
         function getQuestionInput(question, index) {
             switch (question.type) {
                 case 'fill':
