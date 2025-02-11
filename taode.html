@@ -353,6 +353,48 @@
             padding: 5px 10px;
             margin-left: 10px;
         }
+
+        .reading-tabs {
+            margin-bottom: 15px;
+        }
+
+        .reading-tab {
+            padding: 8px 15px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            background: #f5f5f5;
+            cursor: pointer;
+        }
+
+        .reading-tab.active {
+            background: #007bff;
+            color: white;
+            border-color: #0056b3;
+        }
+
+        .reading-content {
+            display: none;
+        }
+
+        .reading-content.active {
+            display: block;
+        }
+
+        .reading-title-field {
+            margin-bottom: 15px;
+        }
+
+        .reading-title-field label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .reading-title-field input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
@@ -368,19 +410,33 @@
 
             <div class="exam-header">
                 <div class="header-field">
-                    <label for="exam-title">Tiêu đề đề thi:</label>
-                    <input type="text" id="exam-title" placeholder="Nhập tiêu đề đề thi...">
+                    <label for="exam-number">Đề thi số:</label>
+                    <input type="number" id="exam-number" min="1" placeholder="Nhập số đề thi...">
                 </div>
-
-                <div class="header-field">
-                    <label for="exam-time">Thời gian làm bài (phút):</label>
-                    <input type="number" id="exam-time" min="1" placeholder="Nhập thời gian...">
-                </div>
+                <!-- Ẩn input thời gian vì đã cố định 30 phút -->
+                <input type="hidden" id="exam-time" value="30">
             </div>
 
             <div class="reading-section">
                 <h2>Bài đọc</h2>
-                <textarea id="reading-text" placeholder="Nhập bài văn vào đây..."></textarea>
+                <div class="reading-tabs">
+                    <button class="reading-tab active" onclick="switchReading(1)">Bài đọc 1</button>
+                    <button class="reading-tab" onclick="switchReading(2)">Bài đọc 2</button>
+                </div>
+                <div id="reading1" class="reading-content active">
+                    <div class="reading-title-field">
+                        <label for="reading-title-1">Tiêu đề bài đọc 1:</label>
+                        <input type="text" id="reading-title-1" placeholder="Nhập tiêu đề bài đọc 1...">
+                    </div>
+                    <textarea id="reading-text-1" placeholder="Nhập nội dung bài văn 1 vào đây..."></textarea>
+                </div>
+                <div id="reading2" class="reading-content">
+                    <div class="reading-title-field">
+                        <label for="reading-title-2">Tiêu đề bài đọc 2:</label>
+                        <input type="text" id="reading-title-2" placeholder="Nhập tiêu đề bài đọc 2...">
+                    </div>
+                    <textarea id="reading-text-2" placeholder="Nhập nội dung bài văn 2 vào đây..."></textarea>
+                </div>
             </div>
 
             <div class="question-section">
@@ -990,22 +1046,39 @@
             }
         }
 
+        function switchReading(readingNumber) {
+            // Xử lý active tab
+            document.querySelectorAll('.reading-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.reading-tab:nth-child(${readingNumber})`).classList.add('active');
+
+            // Xử lý hiển thị nội dung
+            document.querySelectorAll('.reading-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`reading${readingNumber}`).classList.add('active');
+        }
+
+        // Cập nhật hàm saveExam để lưu cả 2 bài đọc
         async function saveExam() {
             try {
-                const examTitle = document.getElementById('exam-title').value;
-                const examTime = document.getElementById('exam-time').value;
-                const readingText = document.getElementById('reading-text').value;
+                const examNumber = document.getElementById('exam-number').value;
+                const readingTitle1 = document.getElementById('reading-title-1').value;
+                const readingTitle2 = document.getElementById('reading-title-2').value;
+                const readingText1 = document.getElementById('reading-text-1').value;
+                const readingText2 = document.getElementById('reading-text-2').value;
 
-                if (!examTitle.trim()) {
-                    alert('Vui lòng nhập tiêu đề đề thi!');
+                if (!examNumber || examNumber <= 0) {
+                    alert('Vui lòng nhập số đề thi hợp lệ!');
                     return;
                 }
-                if (!examTime || examTime <= 0) {
-                    alert('Vui lòng nhập thời gian làm bài hợp lệ!');
+                if (!readingTitle1.trim() || !readingTitle2.trim()) {
+                    alert('Vui lòng nhập tiêu đề cho cả hai bài đọc!');
                     return;
                 }
-                if (!readingText.trim()) {
-                    alert('Vui lòng nhập bài đọc!');
+                if (!readingText1.trim() || !readingText2.trim()) {
+                    alert('Vui lòng nhập nội dung cho cả hai bài đọc!');
                     return;
                 }
                 if (questions.length === 0) {
@@ -1014,9 +1087,18 @@
                 }
 
                 const exam = {
-                    title: examTitle,
-                    time: examTime,
-                    reading: readingText,
+                    examNumber: examNumber,
+                    time: 30,
+                    readings: {
+                        reading1: {
+                            title: readingTitle1,
+                            content: readingText1
+                        },
+                        reading2: {
+                            title: readingTitle2,
+                            content: readingText2
+                        }
+                    },
                     questions: questions,
                     createdAt: new Date().toISOString()
                 };
@@ -1040,9 +1122,11 @@
 
         function resetAllForms() {
             try {
-                document.getElementById('exam-title').value = '';
-                document.getElementById('exam-time').value = '';
-                document.getElementById('reading-text').value = '';
+                document.getElementById('exam-number').value = '';
+                document.getElementById('reading-title-1').value = '';
+                document.getElementById('reading-title-2').value = '';
+                document.getElementById('reading-text-1').value = '';
+                document.getElementById('reading-text-2').value = '';
                 questions = [];
                 currentExamId = null;
                 resetForm();
@@ -1080,8 +1164,8 @@
                     const examElement = document.createElement('div');
                     examElement.className = 'exam-item';
                     examElement.innerHTML = `
-                <h3>${exam.title}</h3>
-                <p>Thời gian: ${exam.time} phút</p>
+                <h3>Đề thi số ${exam.examNumber}</h3>
+                <p>Thời gian: 30 phút</p>
                 <p>Số câu hỏi: ${exam.questions.length}</p>
                 <p>Ngày tạo: ${new Date(exam.createdAt).toLocaleDateString()}</p>
                 <div class="exam-actions">
@@ -1145,11 +1229,16 @@
                 }).join('');
 
                 examDetail.innerHTML = `
-            <h2>${exam.title}</h2>
-            <p><strong>Thời gian:</strong> ${exam.time} phút</p>
+            <h2>Đề thi số ${exam.examNumber}</h2>
+            <p><strong>Thời gian:</strong> 30 phút</p>
             <p><strong>Ngày tạo:</strong> ${new Date(exam.createdAt).toLocaleDateString()}</p>
-            <h3>Bài đọc:</h3>
-            <div class="reading-text">${exam.reading}</div>
+            
+            <h3>${exam.readings.reading1.title}</h3>
+            <div class="reading-text">${exam.readings.reading1.content}</div>
+            
+            <h3>${exam.readings.reading2.title}</h3>
+            <div class="reading-text">${exam.readings.reading2.content}</div>
+            
             <h3>Câu hỏi:</h3>
             ${questionsHtml}
         `;
@@ -1167,9 +1256,11 @@
                 const snapshot = await examRef.once('value');
                 const exam = snapshot.val();
 
-                document.getElementById('exam-title').value = exam.title;
-                document.getElementById('exam-time').value = exam.time;
-                document.getElementById('reading-text').value = exam.reading;
+                document.getElementById('exam-number').value = exam.examNumber;
+                document.getElementById('reading-title-1').value = exam.readings.reading1.title;
+                document.getElementById('reading-title-2').value = exam.readings.reading2.title;
+                document.getElementById('reading-text-1').value = exam.readings.reading1.content;
+                document.getElementById('reading-text-2').value = exam.readings.reading2.content;
 
                 questions = exam.questions;
                 currentExamId = examId;
